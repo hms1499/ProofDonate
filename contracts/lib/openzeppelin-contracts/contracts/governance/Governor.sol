@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.1.0) (governance/Governor.sol)
+// OpenZeppelin Contracts (last updated v5.0.0) (governance/Governor.sol)
 
 pragma solidity ^0.8.20;
 
@@ -255,9 +255,9 @@ abstract contract Governor is Context, ERC165, EIP712, Nonces, IGovernor, IERC72
         uint256 proposalId,
         address account,
         uint8 support,
-        uint256 totalWeight,
+        uint256 weight,
         bytes memory params
-    ) internal virtual returns (uint256);
+    ) internal virtual;
 
     /**
      * @dev Default additional encoded parameters used by castVote methods that don't include them
@@ -286,12 +286,10 @@ abstract contract Governor is Context, ERC165, EIP712, Nonces, IGovernor, IERC72
         }
 
         // check proposal threshold
+        uint256 proposerVotes = getVotes(proposer, clock() - 1);
         uint256 votesThreshold = proposalThreshold();
-        if (votesThreshold > 0) {
-            uint256 proposerVotes = getVotes(proposer, clock() - 1);
-            if (proposerVotes < votesThreshold) {
-                revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
-            }
+        if (proposerVotes < votesThreshold) {
+            revert GovernorInsufficientProposerVotes(proposer, proposerVotes, votesThreshold);
         }
 
         return _propose(targets, values, calldatas, description, proposer);
@@ -639,16 +637,16 @@ abstract contract Governor is Context, ERC165, EIP712, Nonces, IGovernor, IERC72
     ) internal virtual returns (uint256) {
         _validateStateBitmap(proposalId, _encodeStateBitmap(ProposalState.Active));
 
-        uint256 totalWeight = _getVotes(account, proposalSnapshot(proposalId), params);
-        uint256 votedWeight = _countVote(proposalId, account, support, totalWeight, params);
+        uint256 weight = _getVotes(account, proposalSnapshot(proposalId), params);
+        _countVote(proposalId, account, support, weight, params);
 
         if (params.length == 0) {
-            emit VoteCast(account, proposalId, support, votedWeight, reason);
+            emit VoteCast(account, proposalId, support, weight, reason);
         } else {
-            emit VoteCastWithParams(account, proposalId, support, votedWeight, reason, params);
+            emit VoteCastWithParams(account, proposalId, support, weight, reason, params);
         }
 
-        return votedWeight;
+        return weight;
     }
 
     /**
@@ -769,7 +767,7 @@ abstract contract Governor is Context, ERC165, EIP712, Nonces, IGovernor, IERC72
 
         // Extract what would be the `#proposer=0x` marker beginning the suffix
         bytes12 marker;
-        assembly ("memory-safe") {
+        assembly {
             // - Start of the string contents in memory = description + 32
             // - First character of the marker = len - 52
             //   - Length of "#proposer=0x0000000000000000000000000000000000000000" = 52
@@ -802,7 +800,7 @@ abstract contract Governor is Context, ERC165, EIP712, Nonces, IGovernor, IERC72
      * @dev Try to parse a character from a string as a hex value. Returns `(true, value)` if the char is in
      * `[0-9a-fA-F]` and `(false, 0)` otherwise. Value is guaranteed to be in the range `0 <= value < 16`
      */
-    function _tryHexToUint(bytes1 char) private pure returns (bool isHex, uint8 value) {
+    function _tryHexToUint(bytes1 char) private pure returns (bool, uint8) {
         uint8 c = uint8(char);
         unchecked {
             // Case 0-9

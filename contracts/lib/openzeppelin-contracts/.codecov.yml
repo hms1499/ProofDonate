@@ -10,6 +10,3 @@ coverage:
     project:
       default:
         threshold: 1%
-ignore:
-  - "test"
-  - "contracts/mocks"
