@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAccount } from "wagmi";
 import { Menu } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ConnectButton } from "@/components/connect-button";
+import { useContractOwner } from "@/hooks/useProofDonate";
 
-const navLinks = [
+const baseNavLinks = [
   { name: "Home", href: "/" },
   { name: "Create", href: "/campaign/create" },
   { name: "Dashboard", href: "/dashboard" },
@@ -17,6 +19,17 @@ const navLinks = [
 
 export function Navbar() {
   const pathname = usePathname();
+  const { address } = useAccount();
+  const { data: ownerAddress } = useContractOwner();
+
+  const isOwner =
+    address && ownerAddress
+      ? address.toLowerCase() === (ownerAddress as string).toLowerCase()
+      : false;
+
+  const navLinks = isOwner
+    ? [...baseNavLinks, { name: "Admin", href: "/admin" }]
+    : baseNavLinks;
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
