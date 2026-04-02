@@ -18,6 +18,11 @@ const config = {
       },
     },
     extend: {
+      fontFamily: {
+        serif: ['"DM Serif Display"', 'Georgia', 'serif'],
+        mono: ['"DM Mono"', 'monospace'],
+        sans: ['"DM Sans"', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

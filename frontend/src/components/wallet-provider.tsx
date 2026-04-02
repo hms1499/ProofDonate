@@ -5,7 +5,7 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { WagmiProvider, createConfig, http, useConnect } from "wagmi";
+import { WagmiProvider, createConfig, createStorage, http, useConnect } from "wagmi";
 import { celo, celoSepolia } from "wagmi/chains";
 import { ConnectButton } from "./connect-button";
 
@@ -29,6 +29,10 @@ const wagmiConfig = createConfig({
     [celo.id]: http(),
     [celoSepolia.id]: http(),
   },
+  storage: createStorage({
+    storage: typeof window !== "undefined" ? window.localStorage : undefined,
+    key: "wagmi",
+  }),
   ssr: true,
 });
 

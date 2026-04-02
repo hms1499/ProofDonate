@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAccount } from "wagmi";
-import { Menu } from "lucide-react";
+import { useState } from "react";
+import { X, Menu } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { ConnectButton } from "@/components/connect-button";
 import { useContractOwner } from "@/hooks/useProofDonate";
 
@@ -21,6 +20,7 @@ export function Navbar() {
   const pathname = usePathname();
   const { address } = useAccount();
   const { data: ownerAddress } = useContractOwner();
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const isOwner =
     address && ownerAddress
@@ -32,66 +32,109 @@ export function Navbar() {
     : baseNavLinks;
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 max-w-screen-2xl items-center justify-between px-4">
-        <div className="flex items-center gap-2">
-          {/* Mobile menu */}
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden">
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <div className="flex items-center gap-2 mb-8">
-                <span className="font-bold text-lg">ProofDonate</span>
-              </div>
-              <nav className="flex flex-col gap-4">
-                {navLinks.map((link) => (
+    <>
+      <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-[#0a0a0a]/90 backdrop-blur-md">
+        <div className="mx-auto max-w-7xl px-6 flex h-14 items-center justify-between">
+
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-px group">
+            <span
+              className="font-['DM_Serif_Display'] italic text-[#35D07F] text-lg leading-none"
+              style={{ fontStyle: 'italic' }}
+            >
+              Proof
+            </span>
+            <span className="font-['DM_Serif_Display'] text-white text-lg leading-none">
+              Donate
+            </span>
+          </Link>
+
+          {/* Desktop nav */}
+          <nav className="hidden md:flex items-center gap-7">
+            {navLinks.map((link) => {
+              const active = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative text-xs font-mono uppercase tracking-widest transition-colors pb-0.5 ${
+                    active ? "text-white" : "text-white/40 hover:text-white/75"
+                  }`}
+                >
+                  {link.name}
+                  {active && (
+                    <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-[#35D07F]" />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            <ConnectButton />
+
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(true)}
+              className="md:hidden p-2 text-white/50 hover:text-white transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile drawer */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setMobileOpen(false)}
+          />
+
+          {/* Panel */}
+          <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0d0d0d] border-l border-white/8 flex flex-col">
+            <div className="flex items-center justify-between px-6 h-14 border-b border-white/8">
+              <span className="font-['DM_Serif_Display'] text-white text-base">
+                <span className="italic text-[#35D07F]">Proof</span>Donate
+              </span>
+              <button
+                onClick={() => setMobileOpen(false)}
+                className="p-1.5 text-white/40 hover:text-white transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <nav className="flex flex-col px-6 py-8 gap-1">
+              {navLinks.map((link) => {
+                const active = pathname === link.href;
+                return (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-base font-medium transition-colors hover:text-primary ${
-                      pathname === link.href
-                        ? "text-foreground"
-                        : "text-foreground/70"
+                    onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 py-3 text-sm font-mono uppercase tracking-widest transition-colors ${
+                      active ? "text-white" : "text-white/40 hover:text-white/75"
                     }`}
                   >
+                    {active && <span className="w-1 h-1 rounded-full bg-[#35D07F]" />}
+                    {!active && <span className="w-1 h-1" />}
                     {link.name}
                   </Link>
-                ))}
-              </nav>
-            </SheetContent>
-          </Sheet>
+                );
+              })}
+            </nav>
 
-          {/* Logo */}
-          <Link
-            href="/"
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
-          >
-            <span className="font-bold text-xl">ProofDonate</span>
-          </Link>
+            <div className="mt-auto px-6 pb-8">
+              <ConnectButton />
+            </div>
+          </div>
         </div>
-
-        {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={`text-sm font-medium transition-colors hover:text-primary ${
-                pathname === link.href
-                  ? "text-foreground"
-                  : "text-foreground/70"
-              }`}
-            >
-              {link.name}
-            </Link>
-          ))}
-          <ConnectButton />
-        </nav>
-      </div>
-    </header>
+      )}
+    </>
   );
 }
