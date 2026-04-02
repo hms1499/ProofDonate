@@ -191,9 +191,11 @@ export function useVerificationRequested(address: `0x${string}` | undefined) {
 }
 
 export function useContractOwner() {
+  const isValidAddress = PROOF_DONATE_ADDRESS !== "0x0000000000000000000000000000000000000000";
   return useReadContract({
     ...contractConfig,
     functionName: "owner",
+    query: { enabled: isValidAddress },
   });
 }
 
