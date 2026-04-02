@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.4.0) (governance/extensions/GovernorCountingSimple.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (governance/extensions/GovernorCountingSimple.sol)
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
-import {IGovernor, Governor} from "../Governor.sol";
+import {Governor} from "../Governor.sol";
 
 /**
  * @dev Extension of {Governor} for simple, 3 options, vote counting.
@@ -27,13 +27,17 @@ abstract contract GovernorCountingSimple is Governor {
 
     mapping(uint256 proposalId => ProposalVote) private _proposalVotes;
 
-    /// @inheritdoc IGovernor
+    /**
+     * @dev See {IGovernor-COUNTING_MODE}.
+     */
     // solhint-disable-next-line func-name-mixedcase
     function COUNTING_MODE() public pure virtual override returns (string memory) {
         return "support=bravo&quorum=for,abstain";
     }
 
-    /// @inheritdoc IGovernor
+    /**
+     * @dev See {IGovernor-hasVoted}.
+     */
     function hasVoted(uint256 proposalId, address account) public view virtual override returns (bool) {
         return _proposalVotes[proposalId].hasVoted[account];
     }
@@ -48,7 +52,9 @@ abstract contract GovernorCountingSimple is Governor {
         return (proposalVote.againstVotes, proposalVote.forVotes, proposalVote.abstainVotes);
     }
 
-    /// @inheritdoc Governor
+    /**
+     * @dev See {Governor-_quorumReached}.
+     */
     function _quorumReached(uint256 proposalId) internal view virtual override returns (bool) {
         ProposalVote storage proposalVote = _proposalVotes[proposalId];
 

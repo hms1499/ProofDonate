@@ -28,7 +28,7 @@ describe('GovernorTimelockCompound', function () {
       const [deployer, owner, voter1, voter2, voter3, voter4, other] = await ethers.getSigners();
       const receiver = await ethers.deployContract('CallReceiverMock');
 
-      const token = await ethers.deployContract(Token, [tokenName, tokenSymbol, tokenName, version]);
+      const token = await ethers.deployContract(Token, [tokenName, tokenSymbol, version]);
       const predictGovernor = await deployer
         .getNonce()
         .then(nonce => ethers.getCreateAddress({ from: deployer.address, nonce: nonce + 1 }));
@@ -156,8 +156,8 @@ describe('GovernorTimelockCompound', function () {
               .to.be.revertedWithCustomError(this.mock, 'GovernorAlreadyQueuedProposal')
               .withArgs(id);
             await expect(this.helper.execute())
-              .to.be.revertedWithCustomError(this.mock, 'GovernorUnexpectedProposalState')
-              .withArgs(id, ProposalState.Succeeded, GovernorHelper.proposalStatesToBitMap([ProposalState.Queued]));
+              .to.be.revertedWithCustomError(this.mock, 'GovernorNotQueuedProposal')
+              .withArgs(id);
           });
         });
 
@@ -168,13 +168,11 @@ describe('GovernorTimelockCompound', function () {
             await this.helper.connect(this.voter1).vote({ support: VoteType.For });
             await this.helper.waitForDeadline(1n);
 
+            expect(await this.mock.state(this.proposal.id)).to.equal(ProposalState.Succeeded);
+
             await expect(this.helper.execute())
-              .to.be.revertedWithCustomError(this.mock, 'GovernorUnexpectedProposalState')
-              .withArgs(
-                this.proposal.id,
-                ProposalState.Succeeded,
-                GovernorHelper.proposalStatesToBitMap([ProposalState.Queued]),
-              );
+              .to.be.revertedWithCustomError(this.mock, 'GovernorNotQueuedProposal')
+              .withArgs(this.proposal.id);
           });
 
           it('if too early', async function () {
@@ -206,7 +204,7 @@ describe('GovernorTimelockCompound', function () {
               .withArgs(
                 this.proposal.id,
                 ProposalState.Expired,
-                GovernorHelper.proposalStatesToBitMap([ProposalState.Queued]),
+                GovernorHelper.proposalStatesToBitMap([ProposalState.Succeeded, ProposalState.Queued]),
               );
           });
 
@@ -224,7 +222,7 @@ describe('GovernorTimelockCompound', function () {
               .withArgs(
                 this.proposal.id,
                 ProposalState.Executed,
-                GovernorHelper.proposalStatesToBitMap([ProposalState.Queued]),
+                GovernorHelper.proposalStatesToBitMap([ProposalState.Succeeded, ProposalState.Queued]),
               );
           });
         });
@@ -319,7 +317,7 @@ describe('GovernorTimelockCompound', function () {
             .withArgs(
               this.proposal.id,
               ProposalState.Canceled,
-              GovernorHelper.proposalStatesToBitMap([ProposalState.Queued]),
+              GovernorHelper.proposalStatesToBitMap([ProposalState.Succeeded, ProposalState.Queued]),
             );
         });
       });

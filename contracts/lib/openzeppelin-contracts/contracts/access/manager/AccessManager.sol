@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.5.0) (access/manager/AccessManager.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (access/manager/AccessManager.sol)
 
 pragma solidity ^0.8.20;
 
@@ -10,7 +10,6 @@ import {Context} from "../../utils/Context.sol";
 import {Multicall} from "../../utils/Multicall.sol";
 import {Math} from "../../utils/math/Math.sol";
 import {Time} from "../../utils/types/Time.sol";
-import {Hashes} from "../../utils/cryptography/Hashes.sol";
 
 /**
  * @dev AccessManager is a central contract to store the permissions of a system.
@@ -69,7 +68,7 @@ contract AccessManager is Context, Multicall, IAccessManager {
         bool closed;
     }
 
-    // Structure that stores the details for a role/account pair. This structure fits into a single slot.
+    // Structure that stores the details for a role/account pair. This structures fit into a single slot.
     struct Access {
         // Timepoint at which the user gets the permission.
         // If this is either 0 or in the future, then the role permission is not available.
@@ -148,11 +147,6 @@ contract AccessManager is Context, Multicall, IAccessManager {
             // Caller is AccessManager, this means the call was sent through {execute} and it already checked
             // permissions. We verify that the call "identifier", which is set during {execute}, is correct.
             return (_isExecuting(target, selector), 0);
-        } else if (selector == IAccessManaged.setAuthority.selector) {
-            (bool isAdmin, uint32 executionDelay) = hasRole(ADMIN_ROLE, caller);
-            uint32 adminDelay = getTargetAdminDelay(target);
-            uint32 setAuthorityDelay = uint32(Math.max(executionDelay, adminDelay));
-            return isAdmin ? (setAuthorityDelay == 0, setAuthorityDelay) : (false, 0);
         } else {
             uint64 roleId = getTargetFunctionRole(target, selector);
             (bool isMember, uint32 currentDelay) = hasRole(roleId, caller);
@@ -393,11 +387,6 @@ contract AccessManager is Context, Multicall, IAccessManager {
      * Emits a {TargetFunctionRoleUpdated} event.
      */
     function _setTargetFunctionRole(address target, bytes4 selector, uint64 roleId) internal virtual {
-        if (selector == IAccessManaged.setAuthority.selector) {
-            // Prevent updating authority using an execute call, instead only allow it through updateAuthority to
-            // ensure the proper delay and admin restrictions are applied.
-            revert AccessManagerLockedFunction(selector);
-        }
         _targets[target].allowedRoles[selector] = roleId;
         emit TargetFunctionRoleUpdated(target, selector, roleId);
     }
@@ -746,6 +735,6 @@ contract AccessManager is Context, Multicall, IAccessManager {
      * @dev Hashing function for execute protection
      */
     function _hashExecutionId(address target, bytes4 selector) private pure returns (bytes32) {
-        return Hashes.efficientKeccak256(bytes32(uint256(uint160(target))), selector);
+        return keccak256(abi.encode(target, selector));
     }
 }
