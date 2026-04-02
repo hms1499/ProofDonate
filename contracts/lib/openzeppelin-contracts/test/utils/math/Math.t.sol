@@ -7,61 +7,18 @@ import {Test, stdError} from "forge-std/Test.sol";
 import {Math} from "@openzeppelin/contracts/utils/math/Math.sol";
 
 contract MathTest is Test {
-    function testSymbolicTernary(bool f, uint256 a, uint256 b) public pure {
+    function testSymbolicTernary(bool f, uint256 a, uint256 b) public {
         assertEq(Math.ternary(f, a, b), f ? a : b);
     }
 
-    // ADD512 & MUL512
-    function testSymbolicAdd512(uint256 a, uint256 b) public pure {
-        (uint256 high, uint256 low) = Math.add512(a, b);
-
-        // test against tryAdd
-        (bool success, uint256 result) = Math.tryAdd(a, b);
-        if (success) {
-            assertEq(high, 0);
-            assertEq(low, result);
-        } else {
-            assertEq(high, 1);
-        }
-
-        // test against unchecked
-        unchecked {
-            assertEq(low, a + b); // unchecked allow overflow
-        }
-    }
-
-    function testMul512(uint256 a, uint256 b) public pure {
-        (uint256 high, uint256 low) = Math.mul512(a, b);
-
-        // test against tryMul
-        (bool success, uint256 result) = Math.tryMul(a, b);
-        if (success) {
-            assertEq(high, 0);
-            assertEq(low, result);
-        } else {
-            assertGt(high, 0);
-        }
-
-        // test against unchecked
-        unchecked {
-            assertEq(low, a * b); // unchecked allow overflow
-        }
-
-        // test against alternative method
-        (uint256 _high, uint256 _low) = _mulKaratsuba(a, b);
-        assertEq(high, _high);
-        assertEq(low, _low);
-    }
-
     // MIN & MAX
-    function testSymbolicMinMax(uint256 a, uint256 b) public pure {
+    function testSymbolicMinMax(uint256 a, uint256 b) public {
         assertEq(Math.min(a, b), a < b ? a : b);
         assertEq(Math.max(a, b), a > b ? a : b);
     }
 
     // CEILDIV
-    /// @custom:halmos --solver cvc5-int
-    function testSymbolicCeilDiv(uint256 a, uint256 b) public pure {
+    function testCeilDiv(uint256 a, uint256 b) public {
         vm.assume(b > 0);
 
         uint256 result = Math.ceilDiv(a, b);
@@ -78,7 +35,7 @@ contract MathTest is Test {
     }
 
     // SQRT
-    function testSqrt(uint256 input, uint8 r) public pure {
+    function testSqrt(uint256 input, uint8 r) public {
         Math.Rounding rounding = _asRounding(r);
 
         uint256 result = Math.sqrt(input, rounding);
@@ -109,32 +66,31 @@ contract MathTest is Test {
     }
 
     // INV
-    function testInvMod(uint256 value, uint256 p) public pure {
+    function testInvMod(uint256 value, uint256 p) public {
         _testInvMod(value, p, true);
     }
 
-    function testSymbolicInvMod2(uint256 seed) public pure {
+    function testInvMod2(uint256 seed) public {
         uint256 p = 2; // prime
         _testInvMod(bound(seed, 1, p - 1), p, false);
     }
 
-    function testSymbolicInvMod17(uint256 seed) public pure {
+    function testInvMod17(uint256 seed) public {
         uint256 p = 17; // prime
         _testInvMod(bound(seed, 1, p - 1), p, false);
     }
 
-    /// @custom:halmos --solver bitwuzla-abs
-    function testSymbolicInvMod65537(uint256 seed) public pure {
+    function testInvMod65537(uint256 seed) public {
         uint256 p = 65537; // prime
         _testInvMod(bound(seed, 1, p - 1), p, false);
     }
 
-    function testInvModP256(uint256 seed) public pure {
+    function testInvModP256(uint256 seed) public {
         uint256 p = 0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff; // prime
         _testInvMod(bound(seed, 1, p - 1), p, false);
     }
 
-    function _testInvMod(uint256 value, uint256 p, bool allowZero) private pure {
+    function _testInvMod(uint256 value, uint256 p, bool allowZero) private {
         uint256 inverse = Math.invMod(value, p);
         if (inverse != 0) {
             assertEq(mulmod(value, inverse, p), 1);
@@ -145,7 +101,7 @@ contract MathTest is Test {
     }
 
     // LOG2
-    function testLog2(uint256 input, uint8 r) public pure {
+    function testLog2(uint256 input, uint8 r) public {
         Math.Rounding rounding = _asRounding(r);
 
         uint256 result = Math.log2(input, rounding);
@@ -172,7 +128,7 @@ contract MathTest is Test {
     }
 
     // LOG10
-    function testLog10(uint256 input, uint8 r) public pure {
+    function testLog10(uint256 input, uint8 r) public {
         Math.Rounding rounding = _asRounding(r);
 
         uint256 result = Math.log10(input, rounding);
@@ -199,7 +155,7 @@ contract MathTest is Test {
     }
 
     // LOG256
-    function testLog256(uint256 input, uint8 r) public pure {
+    function testLog256(uint256 input, uint8 r) public {
         Math.Rounding rounding = _asRounding(r);
 
         uint256 result = Math.log256(input, rounding);
@@ -226,9 +182,9 @@ contract MathTest is Test {
     }
 
     // MULDIV
-    function testMulDiv(uint256 x, uint256 y, uint256 d) public pure {
+    function testMulDiv(uint256 x, uint256 y, uint256 d) public {
         // Full precision for x * y
-        (uint256 xyHi, uint256 xyLo) = Math.mul512(x, y);
+        (uint256 xyHi, uint256 xyLo) = _mulHighLow(x, y);
 
         // Assume result won't overflow (see {testMulDivDomain})
         // This also checks that `d` is positive
@@ -238,9 +194,9 @@ contract MathTest is Test {
         uint256 q = Math.mulDiv(x, y, d);
 
         // Full precision for q * d
-        (uint256 qdHi, uint256 qdLo) = Math.mul512(q, d);
+        (uint256 qdHi, uint256 qdLo) = _mulHighLow(q, d);
         // Add remainder of x * y / d (computed as rem = (x * y % d))
-        (uint256 c, uint256 qdRemLo) = Math.add512(qdLo, mulmod(x, y, d));
+        (uint256 qdRemLo, uint256 c) = _addCarry(qdLo, mulmod(x, y, d));
         uint256 qdRemHi = qdHi + c;
 
         // Full precision check that x * y = q * d + rem
@@ -248,9 +204,8 @@ contract MathTest is Test {
         assertEq(xyLo, qdRemLo);
     }
 
-    /// forge-config: default.allow_internal_expect_revert = true
     function testMulDivDomain(uint256 x, uint256 y, uint256 d) public {
-        (uint256 xyHi, ) = Math.mul512(x, y);
+        (uint256 xyHi, ) = _mulHighLow(x, y);
 
         // Violate {testMulDiv} assumption (covers d is 0 and result overflow)
         vm.assume(xyHi >= d);
@@ -261,7 +216,6 @@ contract MathTest is Test {
     }
 
     // MOD EXP
-    /// forge-config: default.allow_internal_expect_revert = true
     function testModExp(uint256 b, uint256 e, uint256 m) public {
         if (m == 0) {
             vm.expectRevert(stdError.divisionError);
@@ -271,7 +225,7 @@ contract MathTest is Test {
         assertEq(result, _nativeModExp(b, e, m));
     }
 
-    function testTryModExp(uint256 b, uint256 e, uint256 m) public view {
+    function testTryModExp(uint256 b, uint256 e, uint256 m) public {
         (bool success, uint256 result) = Math.tryModExp(b, e, m);
         assertEq(success, m != 0);
         if (success) {
@@ -282,7 +236,6 @@ contract MathTest is Test {
         }
     }
 
-    /// forge-config: default.allow_internal_expect_revert = true
     function testModExpMemory(uint256 b, uint256 e, uint256 m) public {
         if (m == 0) {
             vm.expectRevert(stdError.divisionError);
@@ -294,7 +247,7 @@ contract MathTest is Test {
         assertEq(res, _nativeModExp(b, e, m));
     }
 
-    function testTryModExpMemory(uint256 b, uint256 e, uint256 m) public view {
+    function testTryModExpMemory(uint256 b, uint256 e, uint256 m) public {
         (bool success, bytes memory result) = Math.tryModExp(
             abi.encodePacked(b),
             abi.encodePacked(e),
@@ -310,23 +263,17 @@ contract MathTest is Test {
         }
     }
 
-    function testSymbolicCountLeadingZeroes(uint256 x) public pure {
-        uint256 result = Math.clz(x);
-
-        if (x == 0) {
-            assertEq(result, 256);
-        } else {
-            // result in [0, 255]
-            assertLe(result, 255);
-
-            // bit at position offset must be non zero
-            uint256 singleBitMask = uint256(1) << (255 - result);
-            assertEq(x & singleBitMask, singleBitMask);
-
-            // all bits before offset must be zero
-            uint256 multiBitsMask = type(uint256).max << (256 - result);
-            assertEq(x & multiBitsMask, 0);
+    function _nativeModExp(uint256 b, uint256 e, uint256 m) private pure returns (uint256) {
+        if (m == 1) return 0;
+        uint256 r = 1;
+        while (e > 0) {
+            if (e % 2 > 0) {
+                r = mulmod(r, b, m);
+            }
+            b = mulmod(b, b, m);
+            e >>= 1;
         }
+        return r;
     }
 
     // Helpers
@@ -335,7 +282,7 @@ contract MathTest is Test {
         return Math.Rounding(r);
     }
 
-    function _mulKaratsuba(uint256 x, uint256 y) private pure returns (uint256 high, uint256 low) {
+    function _mulHighLow(uint256 x, uint256 y) private pure returns (uint256 high, uint256 low) {
         (uint256 x0, uint256 x1) = (x & type(uint128).max, x >> 128);
         (uint256 y0, uint256 y1) = (y & type(uint128).max, y >> 128);
 
@@ -355,16 +302,10 @@ contract MathTest is Test {
         }
     }
 
-    function _nativeModExp(uint256 b, uint256 e, uint256 m) private pure returns (uint256) {
-        if (m == 1) return 0;
-        uint256 r = 1;
-        while (e > 0) {
-            if (e % 2 > 0) {
-                r = mulmod(r, b, m);
-            }
-            b = mulmod(b, b, m);
-            e >>= 1;
+    function _addCarry(uint256 x, uint256 y) private pure returns (uint256 res, uint256 carry) {
+        unchecked {
+            res = x + y;
         }
-        return r;
+        carry = res < x ? 1 : 0;
     }
 }

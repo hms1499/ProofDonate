@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.5.0) (interfaces/draft-IERC6093.sol)
-
-pragma solidity >=0.8.4;
+// OpenZeppelin Contracts (last updated v5.1.0) (interfaces/draft-IERC6093.sol)
+pragma solidity ^0.8.20;
 
 /**
  * @dev Standard ERC-20 Errors
@@ -55,7 +54,7 @@ interface IERC20Errors {
  */
 interface IERC721Errors {
     /**
-     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-721.
+     * @dev Indicates that an address can't be an owner. For example, `address(0)` is a forbidden owner in ERC-20.
      * Used in balance queries.
      * @param owner Address of the current owner of a token.
      */

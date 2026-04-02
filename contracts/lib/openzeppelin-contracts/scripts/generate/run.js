@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-const cp = require('child_process');
+// const cp = require('child_process');
 const fs = require('fs');
 const path = require('path');
 const format = require('./format-lines');
@@ -8,12 +8,12 @@ const format = require('./format-lines');
 function getVersion(path) {
   try {
     return fs.readFileSync(path, 'utf8').match(/\/\/ OpenZeppelin Contracts \(last updated v[^)]+\)/)[0];
-  } catch {
+  } catch (err) {
     return null;
   }
 }
 
-function generateFromTemplate(file, template, outputPrefix = '', lint = false) {
+function generateFromTemplate(file, template, outputPrefix = '') {
   const script = path.relative(path.join(__dirname, '../..'), __filename);
   const input = path.join(path.dirname(script), template);
   const output = path.join(outputPrefix, file);
@@ -27,11 +27,8 @@ function generateFromTemplate(file, template, outputPrefix = '', lint = false) {
   );
 
   fs.writeFileSync(output, content);
-  lint && cp.execFileSync('prettier', ['--write', output]);
+  // cp.execFileSync('prettier', ['--write', output]);
 }
-
-// Some templates needs to go through the linter after generation
-const needsLinter = ['utils/structs/EnumerableMap.sol'];
 
 // Contracts
 for (const [file, template] of Object.entries({
@@ -48,7 +45,7 @@ for (const [file, template] of Object.entries({
   'mocks/StorageSlotMock.sol': './templates/StorageSlotMock.js',
   'mocks/TransientSlotMock.sol': './templates/TransientSlotMock.js',
 })) {
-  generateFromTemplate(file, template, './contracts/', needsLinter.includes(file));
+  generateFromTemplate(file, template, './contracts/');
 }
 
 // Tests
@@ -57,5 +54,5 @@ for (const [file, template] of Object.entries({
   'utils/Packing.t.sol': './templates/Packing.t.js',
   'utils/SlotDerivation.t.sol': './templates/SlotDerivation.t.js',
 })) {
-  generateFromTemplate(file, template, './test/', needsLinter.includes(file));
+  generateFromTemplate(file, template, './test/');
 }

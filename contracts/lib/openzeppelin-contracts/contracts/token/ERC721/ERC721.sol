@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.6.0) (token/ERC721/ERC721.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/ERC721.sol)
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
 import {IERC721} from "./IERC721.sol";
 import {IERC721Metadata} from "./extensions/IERC721Metadata.sol";
@@ -41,7 +41,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         _symbol = symbol_;
     }
 
-    /// @inheritdoc IERC165
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165, IERC165) returns (bool) {
         return
             interfaceId == type(IERC721).interfaceId ||
@@ -49,7 +51,9 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
             super.supportsInterface(interfaceId);
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-balanceOf}.
+     */
     function balanceOf(address owner) public view virtual returns (uint256) {
         if (owner == address(0)) {
             revert ERC721InvalidOwner(address(0));
@@ -57,22 +61,30 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         return _balances[owner];
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-ownerOf}.
+     */
     function ownerOf(uint256 tokenId) public view virtual returns (address) {
         return _requireOwned(tokenId);
     }
 
-    /// @inheritdoc IERC721Metadata
+    /**
+     * @dev See {IERC721Metadata-name}.
+     */
     function name() public view virtual returns (string memory) {
         return _name;
     }
 
-    /// @inheritdoc IERC721Metadata
+    /**
+     * @dev See {IERC721Metadata-symbol}.
+     */
     function symbol() public view virtual returns (string memory) {
         return _symbol;
     }
 
-    /// @inheritdoc IERC721Metadata
+    /**
+     * @dev See {IERC721Metadata-tokenURI}.
+     */
     function tokenURI(uint256 tokenId) public view virtual returns (string memory) {
         _requireOwned(tokenId);
 
@@ -89,29 +101,39 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         return "";
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-approve}.
+     */
     function approve(address to, uint256 tokenId) public virtual {
         _approve(to, tokenId, _msgSender());
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-getApproved}.
+     */
     function getApproved(uint256 tokenId) public view virtual returns (address) {
         _requireOwned(tokenId);
 
         return _getApproved(tokenId);
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-setApprovalForAll}.
+     */
     function setApprovalForAll(address operator, bool approved) public virtual {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-isApprovedForAll}.
+     */
     function isApprovedForAll(address owner, address operator) public view virtual returns (bool) {
         return _operatorApprovals[owner][operator];
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-transferFrom}.
+     */
     function transferFrom(address from, address to, uint256 tokenId) public virtual {
         if (to == address(0)) {
             revert ERC721InvalidReceiver(address(0));
@@ -124,12 +146,16 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
         }
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
     function safeTransferFrom(address from, address to, uint256 tokenId) public {
         safeTransferFrom(from, to, tokenId, "");
     }
 
-    /// @inheritdoc IERC721
+    /**
+     * @dev See {IERC721-safeTransferFrom}.
+     */
     function safeTransferFrom(address from, address to, uint256 tokenId, bytes memory data) public virtual {
         transferFrom(from, to, tokenId);
         ERC721Utils.checkOnERC721Received(_msgSender(), from, to, tokenId, data);
@@ -407,9 +433,6 @@ abstract contract ERC721 is Context, ERC165, IERC721, IERC721Metadata, IERC721Er
      * Emits an {ApprovalForAll} event.
      */
     function _setApprovalForAll(address owner, address operator, bool approved) internal virtual {
-        if (owner == address(0)) {
-            revert ERC721InvalidApprover(address(0));
-        }
         if (operator == address(0)) {
             revert ERC721InvalidOperator(operator);
         }

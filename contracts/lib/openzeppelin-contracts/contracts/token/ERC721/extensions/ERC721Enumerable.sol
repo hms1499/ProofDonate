@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
-// OpenZeppelin Contracts (last updated v5.6.0) (token/ERC721/extensions/ERC721Enumerable.sol)
+// OpenZeppelin Contracts (last updated v5.1.0) (token/ERC721/extensions/ERC721Enumerable.sol)
 
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.20;
 
 import {ERC721} from "../ERC721.sol";
 import {IERC721Enumerable} from "./IERC721Enumerable.sol";
@@ -33,12 +33,16 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
      */
     error ERC721EnumerableForbiddenBatchMint();
 
-    /// @inheritdoc IERC165
+    /**
+     * @dev See {IERC165-supportsInterface}.
+     */
     function supportsInterface(bytes4 interfaceId) public view virtual override(IERC165, ERC721) returns (bool) {
         return interfaceId == type(IERC721Enumerable).interfaceId || super.supportsInterface(interfaceId);
     }
 
-    /// @inheritdoc IERC721Enumerable
+    /**
+     * @dev See {IERC721Enumerable-tokenOfOwnerByIndex}.
+     */
     function tokenOfOwnerByIndex(address owner, uint256 index) public view virtual returns (uint256) {
         if (index >= balanceOf(owner)) {
             revert ERC721OutOfBoundsIndex(owner, index);
@@ -46,12 +50,16 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         return _ownedTokens[owner][index];
     }
 
-    /// @inheritdoc IERC721Enumerable
+    /**
+     * @dev See {IERC721Enumerable-totalSupply}.
+     */
     function totalSupply() public view virtual returns (uint256) {
         return _allTokens.length;
     }
 
-    /// @inheritdoc IERC721Enumerable
+    /**
+     * @dev See {IERC721Enumerable-tokenByIndex}.
+     */
     function tokenByIndex(uint256 index) public view virtual returns (uint256) {
         if (index >= totalSupply()) {
             revert ERC721OutOfBoundsIndex(address(0), index);
@@ -59,7 +67,9 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
         return _allTokens[index];
     }
 
-    /// @inheritdoc ERC721
+    /**
+     * @dev See {ERC721-_update}.
+     */
     function _update(address to, uint256 tokenId, address auth) internal virtual override returns (address) {
         address previousOwner = super._update(to, tokenId, auth);
 
@@ -153,8 +163,7 @@ abstract contract ERC721Enumerable is ERC721, IERC721Enumerable {
     }
 
     /**
-     * See {ERC721-_increaseBalance}. We need to forbid batch minting because the enumeration
-     * extension does not support it.
+     * See {ERC721-_increaseBalance}. We need that to account tokens that were minted in batch
      */
     function _increaseBalance(address account, uint128 amount) internal virtual override {
         if (amount > 0) {

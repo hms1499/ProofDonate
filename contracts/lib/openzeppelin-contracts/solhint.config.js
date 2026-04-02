@@ -1,11 +1,10 @@
-const customRules = require('solhint-plugin-openzeppelin');
+const customRules = require('./scripts/solhint-custom');
 
 const rules = [
   'avoid-tx-origin',
   'const-name-snakecase',
-  'contract-name-capwords',
-  'event-name-capwords',
-  'max-states-count',
+  'contract-name-camelcase',
+  'event-name-camelcase',
   'explicit-types',
   'func-name-mixedcase',
   'func-param-name-mixedcase',
@@ -18,8 +17,6 @@ const rules = [
   'use-forbidden-name',
   'var-name-mixedcase',
   'visibility-modifier-order',
-  'interface-starts-with-i',
-  'duplicated-imports',
   ...customRules.map(r => `openzeppelin/${r.ruleId}`),
 ];
 

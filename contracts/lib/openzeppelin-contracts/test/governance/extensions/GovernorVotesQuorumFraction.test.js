@@ -29,7 +29,7 @@ describe('GovernorVotesQuorumFraction', function () {
 
       const receiver = await ethers.deployContract('CallReceiverMock');
 
-      const token = await ethers.deployContract(Token, [tokenName, tokenSymbol, tokenName, version]);
+      const token = await ethers.deployContract(Token, [tokenName, tokenSymbol, version]);
       const mock = await ethers.deployContract('$GovernorMock', [name, votingDelay, votingPeriod, 0n, token, ratio]);
 
       await owner.sendTransaction({ to: mock, value });
@@ -92,7 +92,7 @@ describe('GovernorVotesQuorumFraction', function () {
           .withArgs(
             this.proposal.id,
             ProposalState.Defeated,
-            GovernorHelper.proposalStatesToBitMap([ProposalState.Succeeded]),
+            GovernorHelper.proposalStatesToBitMap([ProposalState.Succeeded, ProposalState.Queued]),
           );
       });
 

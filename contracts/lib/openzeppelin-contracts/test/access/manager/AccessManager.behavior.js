@@ -42,7 +42,7 @@ function shouldBehaveLikeDelayedAdminOperation() {
               .to.be.revertedWithCustomError(this.target, 'AccessManagerUnauthorizedAccount')
               .withArgs(
                 this.caller,
-                this.roles.ADMIN.id, // Although PUBLIC_ROLE is required, target function role doesn't apply to admin ops
+                this.roles.ADMIN.id, // Although PUBLIC is required, target function role doesn't apply to admin ops
               );
           });
         },
@@ -57,15 +57,20 @@ function shouldBehaveLikeDelayedAdminOperation() {
  */
 function shouldBehaveLikeNotDelayedAdminOperation() {
   const getAccessPath = LIKE_COMMON_GET_ACCESS;
-  testAsDelayedOperation.mineDelay = true;
+
+  function testScheduleOperation(mineDelay) {
+    return function self() {
+      self.mineDelay = mineDelay;
+      beforeEach('set execution delay', async function () {
+        this.scheduleIn = this.executionDelay; // For testAsSchedulableOperation
+      });
+      testAsSchedulableOperation(LIKE_COMMON_SCHEDULABLE);
+    };
+  }
+
   getAccessPath.requiredRoleIsGranted.roleGrantingIsDelayed.callerHasAnExecutionDelay.afterGrantDelay =
-    testAsDelayedOperation;
-  getAccessPath.requiredRoleIsGranted.roleGrantingIsNotDelayed.callerHasAnExecutionDelay = function () {
-    beforeEach('set execution delay', async function () {
-      this.scheduleIn = this.executionDelay; // For testAsSchedulableOperation
-    });
-    testAsSchedulableOperation(LIKE_COMMON_SCHEDULABLE);
-  };
+    testScheduleOperation(true);
+  getAccessPath.requiredRoleIsGranted.roleGrantingIsNotDelayed.callerHasAnExecutionDelay = testScheduleOperation(false);
 
   beforeEach('set target as manager', function () {
     this.target = this.manager;
