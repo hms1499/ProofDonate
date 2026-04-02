@@ -165,3 +165,50 @@ export function useCancelCampaign() {
 
   return { cancelCampaign, isPending, isConfirming, isSuccess, hash, error };
 }
+
+export function useRequestVerification() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  const requestVerification = () => {
+    writeContract({
+      ...contractConfig,
+      functionName: "requestVerification",
+    });
+  };
+
+  return { requestVerification, isPending, isConfirming, isSuccess, hash, error };
+}
+
+export function useVerificationRequested(address: `0x${string}` | undefined) {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "verificationRequested",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+}
+
+export function useContractOwner() {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "owner",
+  });
+}
+
+export function useVerifyHuman() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  const verifyHuman = (userAddress: `0x${string}`) => {
+    writeContract({
+      ...contractConfig,
+      functionName: "verifyHuman",
+      args: [userAddress],
+    });
+  };
+
+  return { verifyHuman, isPending, isConfirming, isSuccess, hash, error };
+}
