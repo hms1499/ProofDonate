@@ -28,7 +28,7 @@ function CampaignDashboardCard({
   const raised = Number(formatEther(c.currentAmount));
   const target = Number(formatEther(c.targetAmount));
   const progress = target > 0 ? Math.min((raised / target) * 100, 100) : 0;
-  const completedMilestones = ms.filter((m) => m.released).length;
+  const completedMilestones = ms.filter((m) => m.isReleased).length;
 
   return (
     <div className="border border-white/8 rounded-xl bg-[#0d0d0d] overflow-hidden group hover:border-white/14 transition-colors">
