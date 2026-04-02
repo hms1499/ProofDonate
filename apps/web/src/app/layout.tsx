@@ -8,8 +8,8 @@ import { WalletProvider } from "@/components/wallet-provider"
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'my-celo-app',
-  description: 'A new Celo blockchain project',
+  title: 'ProofDonate - Transparent Donations on Celo',
+  description: 'On-chain donation platform with milestone-based fund release and verified creators.',
 };
 
 export default function RootLayout({
