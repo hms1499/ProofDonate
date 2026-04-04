@@ -97,7 +97,8 @@ export function useDonate() {
     writeContract({
       ...contractConfig,
       functionName: "donate",
-      args: [campaignId, amount],
+      args: [campaignId],
+      value: amount,
     });
   };
 
@@ -196,6 +197,71 @@ export function useContractOwner() {
     ...contractConfig,
     functionName: "owner",
     query: { enabled: isValidAddress },
+  });
+}
+
+export function useRequestMilestoneRelease() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  const requestMilestoneRelease = (campaignId: bigint, milestoneIndex: bigint) => {
+    writeContract({
+      ...contractConfig,
+      functionName: "requestMilestoneRelease",
+      args: [campaignId, milestoneIndex],
+    });
+  };
+
+  return { requestMilestoneRelease, isPending, isConfirming, isSuccess, hash, error };
+}
+
+export function useMilestoneReleaseTime(campaignId: bigint, milestoneIndex: bigint) {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "milestoneReleaseTime",
+    args: [campaignId, milestoneIndex],
+  });
+}
+
+export function useClaimRefund() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  const claimRefund = (campaignId: bigint) => {
+    writeContract({
+      ...contractConfig,
+      functionName: "claimRefund",
+      args: [campaignId],
+    });
+  };
+
+  return { claimRefund, isPending, isConfirming, isSuccess, hash, error };
+}
+
+export function useDonorContribution(campaignId: bigint, donor: `0x${string}` | undefined) {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "donorContributions",
+    args: donor ? [campaignId, donor] : undefined,
+    query: { enabled: !!donor },
+  });
+}
+
+export function useHasRefunded(campaignId: bigint, donor: `0x${string}` | undefined) {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "hasRefunded",
+    args: donor ? [campaignId, donor] : undefined,
+    query: { enabled: !!donor },
+  });
+}
+
+export function usePaused() {
+  return useReadContract({
+    ...contractConfig,
+    functionName: "paused",
   });
 }
 

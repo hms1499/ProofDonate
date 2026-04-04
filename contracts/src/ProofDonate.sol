@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -34,8 +33,9 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- State ---
-    IERC20 public immutable cUSD;
     uint256 public campaignCount;
+
+    uint256 public constant MIN_DONATION = 0.02 ether; // 0.02 CELO
 
     mapping(uint256 => Campaign) public campaigns;
     mapping(uint256 => mapping(uint256 => Milestone)) public milestones;
@@ -51,6 +51,11 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
 
     // campaignId => milestoneIndex => release timestamp (0 means not requested)
     mapping(uint256 => mapping(uint256 => uint256)) public milestoneReleaseTime;
+
+    // Refund tracking
+    mapping(uint256 => mapping(address => uint256)) public donorContributions;
+    mapping(uint256 => mapping(address => bool)) public hasRefunded;
+    mapping(uint256 => uint256) public totalReleased;
 
     event MilestoneReleaseRequested(uint256 indexed campaignId, uint256 milestoneIndex, uint256 releaseTime);
 
@@ -68,6 +73,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     event CampaignCancelled(uint256 indexed campaignId);
     event VerificationRequested(address indexed user);
     event PlatformFeeUpdated(uint256 newFeeBps);
+    event RefundClaimed(uint256 indexed campaignId, address indexed donor, uint256 amount);
 
     // --- Modifiers ---
     modifier onlyCampaignCreator(uint256 _campaignId) {
@@ -76,10 +82,8 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Constructor ---
-    constructor(address _cUSD, uint256 _feeBps) Ownable(msg.sender) {
-        require(_cUSD != address(0), "Invalid cUSD address");
+    constructor(uint256 _feeBps) Ownable(msg.sender) {
         require(_feeBps <= MAX_FEE_BPS, "Fee too high");
-        cUSD = IERC20(_cUSD);
         platformFeeBps = _feeBps;
     }
 
@@ -158,22 +162,21 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Donate ---
-    function donate(uint256 _campaignId, uint256 _amount) external nonReentrant whenNotPaused {
+    function donate(uint256 _campaignId) external payable nonReentrant whenNotPaused {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
         require(block.timestamp <= c.deadline, "Campaign ended");
-        require(_amount > 0, "Amount must be > 0");
-        require(c.currentAmount + _amount <= c.targetAmount, "Exceeds target amount");
+        require(msg.value >= MIN_DONATION, "Below minimum donation");
+        require(c.currentAmount + msg.value <= c.targetAmount, "Exceeds target amount");
 
-        require(cUSD.transferFrom(msg.sender, address(this), _amount), "Transfer failed");
-
-        c.currentAmount += _amount;
+        c.currentAmount += msg.value;
+        donorContributions[_campaignId][msg.sender] += msg.value;
 
         _donations[_campaignId].push(
-            Donation({donor: msg.sender, amount: _amount, timestamp: block.timestamp})
+            Donation({donor: msg.sender, amount: msg.value, timestamp: block.timestamp})
         );
 
-        emit DonationMade(_campaignId, msg.sender, _amount);
+        emit DonationMade(_campaignId, msg.sender, msg.value);
     }
 
     // --- Milestone Release Request ---
@@ -231,14 +234,17 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
 
         m.isReleased = true;
         c.currentAmount -= m.amount;
+        totalReleased[_campaignId] += m.amount;
 
         uint256 fee = (m.amount * platformFeeBps) / 10000;
         uint256 creatorAmount = m.amount - fee;
 
         if (fee > 0) {
-            require(cUSD.transfer(owner(), fee), "Fee transfer failed");
+            (bool feeSuccess,) = payable(owner()).call{value: fee}("");
+            require(feeSuccess, "Fee transfer failed");
         }
-        require(cUSD.transfer(c.creator, creatorAmount), "Transfer failed");
+        (bool success,) = payable(c.creator).call{value: creatorAmount}("");
+        require(success, "Transfer failed");
 
         emit MilestoneReleased(_campaignId, _milestoneIndex, m.amount);
     }
@@ -249,6 +255,33 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         require(c.isActive, "Campaign not active");
         c.isActive = false;
         emit CampaignCancelled(_campaignId);
+    }
+
+    // --- Refund ---
+    function claimRefund(uint256 _campaignId) external nonReentrant {
+        Campaign storage c = campaigns[_campaignId];
+
+        bool isExpired = block.timestamp > c.deadline;
+        bool isCancelled = !c.isActive;
+        require(isExpired || isCancelled, "Campaign still active");
+
+        require(!hasRefunded[_campaignId][msg.sender], "Already refunded");
+
+        uint256 donated = donorContributions[_campaignId][msg.sender];
+        require(donated > 0, "No donation found");
+
+        // totalDonated = what's in contract + what's been released
+        uint256 totalDonated = c.currentAmount + totalReleased[_campaignId];
+        // Each donor gets back their proportional share of remaining funds
+        uint256 refundAmount = (donated * c.currentAmount) / totalDonated;
+
+        hasRefunded[_campaignId][msg.sender] = true;
+        c.currentAmount -= refundAmount;
+
+        (bool success,) = payable(msg.sender).call{value: refundAmount}("");
+        require(success, "Refund transfer failed");
+
+        emit RefundClaimed(_campaignId, msg.sender, refundAmount);
     }
 
     // --- Pausable ---
@@ -285,4 +318,6 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     function getCreatorCampaigns(address _creator) external view returns (uint256[] memory) {
         return _creatorCampaigns[_creator];
     }
+
+    receive() external payable {}
 }

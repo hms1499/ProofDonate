@@ -171,7 +171,7 @@ export default function CreateCampaignPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Target (cUSD)</label>
+                    <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Target (CELO)</label>
                     <input
                       type="number" min="1" step="0.01"
                       value={targetAmount}
@@ -233,7 +233,7 @@ export default function CreateCampaignPage() {
                             placeholder="0.00"
                             className={inputCls}
                           />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/20 pointer-events-none">cUSD</span>
+                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/20 pointer-events-none">CELO</span>
                         </div>
                       </div>
                       {milestones.length > 1 && (
@@ -252,7 +252,7 @@ export default function CreateCampaignPage() {
                 {milestoneMismatch && (
                   <div className="mt-4 border border-red-500/20 bg-red-500/5 rounded-lg px-4 py-3">
                     <p className="text-xs text-red-400 font-mono">
-                      Total {milestoneSum.toFixed(2)} ≠ target {targetNum.toFixed(2)} cUSD
+                      Total {milestoneSum.toFixed(2)} ≠ target {targetNum.toFixed(2)} CELO
                     </p>
                   </div>
                 )}
@@ -280,7 +280,7 @@ export default function CreateCampaignPage() {
                     <div>
                       <p className="text-xs text-white/30 mb-1">Target</p>
                       <p className="font-['DM_Serif_Display'] text-xl text-white">{targetAmount || '—'}</p>
-                      <p className="text-xs text-white/25">cUSD</p>
+                      <p className="text-xs text-white/25">CELO</p>
                     </div>
                     <div>
                       <p className="text-xs text-white/30 mb-1">Duration</p>

@@ -63,7 +63,7 @@ export function MilestoneTracker({
               <div className="flex items-center justify-between gap-2">
                 <p className="font-medium text-sm">{milestone.description}</p>
                 <span className="text-sm text-muted-foreground whitespace-nowrap">
-                  {Number(formatEther(milestone.amount)).toFixed(2)} cUSD
+                  {Number(formatEther(milestone.amount)).toFixed(2)} CELO
                 </span>
               </div>
               {milestone.isReleased && (

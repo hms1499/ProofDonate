@@ -3,22 +3,12 @@ pragma solidity ^0.8.28;
 
 import "forge-std/Test.sol";
 import "../src/ProofDonate.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-
-contract MockERC20 is ERC20 {
-    constructor() ERC20("Celo Dollar", "cUSD") {}
-
-    function mint(address to, uint256 amount) external {
-        _mint(to, amount);
-    }
-}
 
 contract ProofDonateTest is Test {
     error OwnableUnauthorizedAccount(address account);
 
     ProofDonate public proofDonate;
-    MockERC20 public cUSD;
 
     address public owner = address(this);
     address public creator = address(0x1);
@@ -27,16 +17,11 @@ contract ProofDonateTest is Test {
     address public unverified = address(0x4);
 
     function setUp() public {
-        cUSD = new MockERC20();
-        proofDonate = new ProofDonate(address(cUSD), 200); // 2% fee
+        proofDonate = new ProofDonate(200); // 2% fee
 
-        cUSD.mint(donor1, 10000 ether);
-        cUSD.mint(donor2, 10000 ether);
-
-        vm.prank(donor1);
-        cUSD.approve(address(proofDonate), type(uint256).max);
-        vm.prank(donor2);
-        cUSD.approve(address(proofDonate), type(uint256).max);
+        // Fund test accounts with native CELO
+        vm.deal(donor1, 10000 ether);
+        vm.deal(donor2, 10000 ether);
 
         proofDonate.verifyHuman(creator);
     }
@@ -67,10 +52,6 @@ contract ProofDonateTest is Test {
     // Deployment
     // ========================
 
-    function test_DeploymentSetsCorrectCUSD() public view {
-        assertEq(address(proofDonate.cUSD()), address(cUSD));
-    }
-
     function test_DeploymentSetsCorrectOwner() public view {
         assertEq(proofDonate.owner(), owner);
     }
@@ -79,9 +60,9 @@ contract ProofDonateTest is Test {
         assertEq(proofDonate.campaignCount(), 0);
     }
 
-    function test_RevertDeployWithZeroAddress() public {
-        vm.expectRevert("Invalid cUSD address");
-        new ProofDonate(address(0), 200);
+    function test_RevertDeployWithFeeTooHigh() public {
+        vm.expectRevert("Fee too high");
+        new ProofDonate(1001);
     }
 
     // ========================
@@ -215,14 +196,14 @@ contract ProofDonateTest is Test {
     }
 
     // ========================
-    // Donations
+    // Donations (Native CELO)
     // ========================
 
     function test_AcceptDonation() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 100 ether);
+        proofDonate.donate{value: 100 ether}(0);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
         assertEq(c.currentAmount, 100 ether);
@@ -233,13 +214,31 @@ contract ProofDonateTest is Test {
         assertEq(ds[0].donor, donor1);
     }
 
+    function test_MinimumDonation() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 0.02 ether}(0);
+
+        ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
+        assertEq(c.currentAmount, 0.02 ether);
+    }
+
+    function test_RevertDonationBelowMinimum() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        vm.expectRevert("Below minimum donation");
+        proofDonate.donate{value: 0.01 ether}(0);
+    }
+
     function test_MultipleDonations() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 200 ether);
+        proofDonate.donate{value: 200 ether}(0);
         vm.prank(donor2);
-        proofDonate.donate(0, 300 ether);
+        proofDonate.donate{value: 300 ether}(0);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
         assertEq(c.currentAmount, 500 ether);
@@ -254,7 +253,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         vm.expectRevert("Campaign not active");
-        proofDonate.donate(0, 100 ether);
+        proofDonate.donate{value: 100 ether}(0);
     }
 
     function test_RevertDonateAfterDeadline() public {
@@ -264,15 +263,15 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         vm.expectRevert("Campaign ended");
-        proofDonate.donate(0, 100 ether);
+        proofDonate.donate{value: 100 ether}(0);
     }
 
     function test_RevertDonateZeroAmount() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        vm.expectRevert("Amount must be > 0");
-        proofDonate.donate(0, 0);
+        vm.expectRevert("Below minimum donation");
+        proofDonate.donate{value: 0}(0);
     }
 
     // ========================
@@ -283,13 +282,13 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 500 ether);
+        proofDonate.donate{value: 500 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
         vm.warp(block.timestamp + 3 days + 1);
 
-        uint256 balBefore = cUSD.balanceOf(creator);
+        uint256 balBefore = creator.balance;
 
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 0);
@@ -299,7 +298,7 @@ contract ProofDonateTest is Test {
         assertFalse(ms[1].isReleased);
 
         // 400 ether - 2% fee (8 ether) = 392 ether
-        assertEq(cUSD.balanceOf(creator) - balBefore, 392 ether);
+        assertEq(creator.balance - balBefore, 392 ether);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
         assertEq(c.currentAmount, 100 ether);
@@ -309,7 +308,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         // Cannot request milestone 1 before milestone 0 is released
         vm.prank(creator);
@@ -340,7 +339,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 500 ether);
+        proofDonate.donate{value: 500 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
@@ -358,7 +357,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 100 ether);
+        proofDonate.donate{value: 100 ether}(0);
 
         vm.prank(creator);
         vm.expectRevert("Insufficient funds");
@@ -369,7 +368,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 500 ether);
+        proofDonate.donate{value: 500 ether}(0);
 
         vm.prank(donor1);
         vm.expectRevert("Not campaign creator");
@@ -444,7 +443,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         vm.expectRevert();
-        proofDonate.donate(0, 100 ether);
+        proofDonate.donate{value: 100 ether}(0);
     }
 
     function test_RevertCreateCampaignWhenPaused() public {
@@ -475,14 +474,14 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         vm.expectRevert("Exceeds target amount");
-        proofDonate.donate(0, 1001 ether);
+        proofDonate.donate{value: 1001 ether}(0);
     }
 
     function test_DonateExactlyTarget() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
         assertEq(c.currentAmount, 1000 ether);
@@ -492,11 +491,11 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(donor2);
         vm.expectRevert("Exceeds target amount");
-        proofDonate.donate(0, 1 ether);
+        proofDonate.donate{value: 1 ether}(0);
     }
 
     // ========================
@@ -511,27 +510,29 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
         vm.warp(block.timestamp + 3 days + 1);
 
-        uint256 creatorBalBefore = cUSD.balanceOf(creator);
-        uint256 treasuryBalBefore = cUSD.balanceOf(owner);
+        uint256 creatorBalBefore = creator.balance;
+        uint256 treasuryBalBefore = owner.balance;
 
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 0);
 
-        assertEq(cUSD.balanceOf(creator) - creatorBalBefore, 392 ether);
-        assertEq(cUSD.balanceOf(owner) - treasuryBalBefore, 8 ether);
+        assertEq(creator.balance - creatorBalBefore, 392 ether);
+        assertEq(owner.balance - treasuryBalBefore, 8 ether);
     }
 
     function test_FeeCollectedAcrossMultipleMilestones() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
+
+        uint256 ownerBalBefore = owner.balance;
 
         // Release milestone 0
         vm.prank(creator);
@@ -547,7 +548,7 @@ contract ProofDonateTest is Test {
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 1);
 
-        assertEq(cUSD.balanceOf(owner), 14 ether);
+        assertEq(owner.balance - ownerBalBefore, 14 ether);
     }
 
     function test_OwnerCanUpdateFee() public {
@@ -572,7 +573,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
@@ -584,7 +585,7 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
@@ -599,30 +600,205 @@ contract ProofDonateTest is Test {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
 
         vm.warp(block.timestamp + 3 days + 1);
 
-        uint256 creatorBalBefore = cUSD.balanceOf(creator);
+        uint256 creatorBalBefore = creator.balance;
 
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 0);
 
         // 400 ether - 2% fee = 392 ether
-        assertEq(cUSD.balanceOf(creator) - creatorBalBefore, 392 ether);
+        assertEq(creator.balance - creatorBalBefore, 392 ether);
     }
 
     function test_RevertRequestReleaseByNonCreator() public {
         _createSampleCampaign();
 
         vm.prank(donor1);
-        proofDonate.donate(0, 1000 ether);
+        proofDonate.donate{value: 1000 ether}(0);
 
         vm.prank(donor1);
         vm.expectRevert("Not campaign creator");
         proofDonate.requestMilestoneRelease(0, 0);
     }
+
+    // ========================
+    // Refund Mechanism
+    // ========================
+
+    function test_ClaimRefundAfterCancel() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 500 ether}(0);
+
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        uint256 balBefore = donor1.balance;
+
+        vm.prank(donor1);
+        proofDonate.claimRefund(0);
+
+        assertEq(donor1.balance - balBefore, 500 ether);
+    }
+
+    function test_ClaimRefundAfterExpiry() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 500 ether}(0);
+
+        // Warp past deadline
+        vm.warp(block.timestamp + 31 days);
+
+        uint256 balBefore = donor1.balance;
+
+        vm.prank(donor1);
+        proofDonate.claimRefund(0);
+
+        assertEq(donor1.balance - balBefore, 500 ether);
+    }
+
+    function test_PartialRefundAfterMilestoneRelease() public {
+        _createSampleCampaign(); // 3 milestones: 400, 300, 300
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 1000 ether}(0);
+
+        // Release first milestone (400 ether)
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+        vm.warp(block.timestamp + 3 days + 1);
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 0);
+
+        // Cancel campaign
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        // Donor should get back remaining: 1000 - 400 = 600 ether
+        uint256 balBefore = donor1.balance;
+
+        vm.prank(donor1);
+        proofDonate.claimRefund(0);
+
+        assertEq(donor1.balance - balBefore, 600 ether);
+    }
+
+    function test_MultipleDonorsRefund() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 300 ether}(0);
+        vm.prank(donor2);
+        proofDonate.donate{value: 200 ether}(0);
+
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        uint256 bal1Before = donor1.balance;
+        uint256 bal2Before = donor2.balance;
+
+        vm.prank(donor1);
+        proofDonate.claimRefund(0);
+        vm.prank(donor2);
+        proofDonate.claimRefund(0);
+
+        // Proportional refund: donor1 gets 300, donor2 gets 200
+        assertEq(donor1.balance - bal1Before, 300 ether);
+        assertEq(donor2.balance - bal2Before, 200 ether);
+    }
+
+    function test_RevertRefundActiveCampaign() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 100 ether}(0);
+
+        vm.prank(donor1);
+        vm.expectRevert("Campaign still active");
+        proofDonate.claimRefund(0);
+    }
+
+    function test_RevertDoubleRefund() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 500 ether}(0);
+
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        vm.prank(donor1);
+        proofDonate.claimRefund(0);
+
+        vm.prank(donor1);
+        vm.expectRevert("Already refunded");
+        proofDonate.claimRefund(0);
+    }
+
+    // ========================
+    // Cancel + Timelock Interaction
+    // ========================
+
+    function test_CancelBlocksPendingMilestoneRelease() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 1000 ether}(0);
+
+        // Request milestone release
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+
+        // Cancel campaign
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        // Try to release after timelock - should fail because cancelled
+        vm.warp(block.timestamp + 3 days + 1);
+
+        vm.prank(creator);
+        vm.expectRevert("Campaign not active");
+        proofDonate.releaseMilestone(0, 0);
+    }
+
+    function test_RevertRefundNonDonor() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 500 ether}(0);
+
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        vm.prank(unverified); // never donated
+        vm.expectRevert("No donation found");
+        proofDonate.claimRefund(0);
+    }
+
+    // ========================
+    // Min Donation Constant
+    // ========================
+
+    function test_MinDonationIs0Point02Ether() public view {
+        assertEq(proofDonate.MIN_DONATION(), 0.02 ether);
+    }
+
+    // ========================
+    // Receive function
+    // ========================
+
+    function test_ContractCanReceiveEther() public {
+        (bool success,) = address(proofDonate).call{value: 1 ether}("");
+        assertTrue(success);
+    }
+
+    receive() external payable {}
 }
