@@ -285,6 +285,10 @@ contract ProofDonateTest is Test {
         vm.prank(donor1);
         proofDonate.donate(0, 500 ether);
 
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+        vm.warp(block.timestamp + 3 days + 1);
+
         uint256 balBefore = cUSD.balanceOf(creator);
 
         vm.prank(creator);
@@ -294,6 +298,7 @@ contract ProofDonateTest is Test {
         assertTrue(ms[0].isReleased);
         assertFalse(ms[1].isReleased);
 
+        // 400 ether - 2% fee (8 ether) = 392 ether
         assertEq(cUSD.balanceOf(creator) - balBefore, 392 ether);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
@@ -306,12 +311,22 @@ contract ProofDonateTest is Test {
         vm.prank(donor1);
         proofDonate.donate(0, 1000 ether);
 
+        // Cannot request milestone 1 before milestone 0 is released
         vm.prank(creator);
         vm.expectRevert("Previous milestone not released");
-        proofDonate.releaseMilestone(0, 1);
+        proofDonate.requestMilestoneRelease(0, 1);
 
+        // Release milestone 0
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+        skip(3 days + 1);
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 0);
+
+        // Now release milestone 1
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 1);
+        skip(3 days + 1);
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 1);
 
@@ -326,6 +341,10 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         proofDonate.donate(0, 500 ether);
+
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+        vm.warp(block.timestamp + 3 days + 1);
 
         vm.prank(creator);
         proofDonate.releaseMilestone(0, 0);
@@ -343,7 +362,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(creator);
         vm.expectRevert("Insufficient funds");
-        proofDonate.releaseMilestone(0, 0);
+        proofDonate.requestMilestoneRelease(0, 0);
     }
 
     function test_RevertReleaseByNonCreator() public {
@@ -354,7 +373,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(donor1);
         vm.expectRevert("Not campaign creator");
-        proofDonate.releaseMilestone(0, 0);
+        proofDonate.requestMilestoneRelease(0, 0);
     }
 
     // ========================
@@ -494,13 +513,16 @@ contract ProofDonateTest is Test {
         vm.prank(donor1);
         proofDonate.donate(0, 1000 ether);
 
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+        vm.warp(block.timestamp + 3 days + 1);
+
         uint256 creatorBalBefore = cUSD.balanceOf(creator);
         uint256 treasuryBalBefore = cUSD.balanceOf(owner);
 
         vm.prank(creator);
-        proofDonate.releaseMilestone(0, 0); // 400 ether milestone
+        proofDonate.releaseMilestone(0, 0);
 
-        // 2% fee = 8 ether, creator gets 392 ether
         assertEq(cUSD.balanceOf(creator) - creatorBalBefore, 392 ether);
         assertEq(cUSD.balanceOf(owner) - treasuryBalBefore, 8 ether);
     }
@@ -511,12 +533,20 @@ contract ProofDonateTest is Test {
         vm.prank(donor1);
         proofDonate.donate(0, 1000 ether);
 
+        // Release milestone 0
         vm.prank(creator);
-        proofDonate.releaseMilestone(0, 0); // 400 ether
+        proofDonate.requestMilestoneRelease(0, 0);
+        skip(3 days + 1);
         vm.prank(creator);
-        proofDonate.releaseMilestone(0, 1); // 300 ether
+        proofDonate.releaseMilestone(0, 0);
 
-        // Total fees: 400*0.02 + 300*0.02 = 8 + 6 = 14
+        // Release milestone 1
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 1);
+        skip(3 days + 1);
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 1);
+
         assertEq(cUSD.balanceOf(owner), 14 ether);
     }
 
@@ -528,5 +558,71 @@ contract ProofDonateTest is Test {
     function test_RevertFeeAboveMax() public {
         vm.expectRevert("Fee too high");
         proofDonate.updatePlatformFee(1001); // > 10%
+    }
+
+    // ========================
+    // Milestone Timelock
+    // ========================
+
+    function test_MilestoneTimelockDuration() public view {
+        assertEq(proofDonate.MILESTONE_TIMELOCK(), 3 days);
+    }
+
+    function test_RequestMilestoneRelease() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+
+        assertGt(proofDonate.milestoneReleaseTime(0, 0), 0);
+    }
+
+    function test_RevertReleaseBeforeTimelock() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+
+        // Try to release immediately
+        vm.prank(creator);
+        vm.expectRevert("Timelock not expired");
+        proofDonate.releaseMilestone(0, 0);
+    }
+
+    function test_ReleaseAfterTimelock() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(creator);
+        proofDonate.requestMilestoneRelease(0, 0);
+
+        vm.warp(block.timestamp + 3 days + 1);
+
+        uint256 creatorBalBefore = cUSD.balanceOf(creator);
+
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 0);
+
+        // 400 ether - 2% fee = 392 ether
+        assertEq(cUSD.balanceOf(creator) - creatorBalBefore, 392 ether);
+    }
+
+    function test_RevertRequestReleaseByNonCreator() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(donor1);
+        vm.expectRevert("Not campaign creator");
+        proofDonate.requestMilestoneRelease(0, 0);
     }
 }
