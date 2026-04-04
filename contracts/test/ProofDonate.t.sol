@@ -446,4 +446,37 @@ contract ProofDonateTest is Test {
         vm.expectRevert();
         proofDonate.pause();
     }
+
+    // ========================
+    // Donation Cap
+    // ========================
+
+    function test_RevertDonateOverTarget() public {
+        _createSampleCampaign(); // target = 1000 ether
+
+        vm.prank(donor1);
+        vm.expectRevert("Exceeds target amount");
+        proofDonate.donate(0, 1001 ether);
+    }
+
+    function test_DonateExactlyTarget() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
+        assertEq(c.currentAmount, 1000 ether);
+    }
+
+    function test_RevertDonateWhenAlreadyFull() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(donor2);
+        vm.expectRevert("Exceeds target amount");
+        proofDonate.donate(0, 1 ether);
+    }
 }
