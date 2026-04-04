@@ -47,6 +47,13 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     uint256 public platformFeeBps; // basis points, e.g. 200 = 2%
     uint256 public constant MAX_FEE_BPS = 1000; // 10% max
 
+    uint256 public constant MILESTONE_TIMELOCK = 3 days;
+
+    // campaignId => milestoneIndex => release timestamp (0 means not requested)
+    mapping(uint256 => mapping(uint256 => uint256)) public milestoneReleaseTime;
+
+    event MilestoneReleaseRequested(uint256 indexed campaignId, uint256 milestoneIndex, uint256 releaseTime);
+
     // --- Events ---
     event CampaignCreated(
         uint256 indexed campaignId,
@@ -169,6 +176,34 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         emit DonationMade(_campaignId, msg.sender, _amount);
     }
 
+    // --- Milestone Release Request ---
+    function requestMilestoneRelease(
+        uint256 _campaignId,
+        uint256 _milestoneIndex
+    ) external whenNotPaused onlyCampaignCreator(_campaignId) {
+        Campaign storage c = campaigns[_campaignId];
+        require(c.isActive, "Campaign not active");
+        require(_milestoneIndex < c.milestoneCount, "Invalid milestone index");
+
+        Milestone storage m = milestones[_campaignId][_milestoneIndex];
+        require(!m.isReleased, "Already released");
+
+        if (_milestoneIndex > 0) {
+            require(
+                milestones[_campaignId][_milestoneIndex - 1].isReleased,
+                "Previous milestone not released"
+            );
+        }
+
+        require(c.currentAmount >= m.amount, "Insufficient funds");
+        require(milestoneReleaseTime[_campaignId][_milestoneIndex] == 0, "Already requested");
+
+        uint256 releaseTime = block.timestamp + MILESTONE_TIMELOCK;
+        milestoneReleaseTime[_campaignId][_milestoneIndex] = releaseTime;
+
+        emit MilestoneReleaseRequested(_campaignId, _milestoneIndex, releaseTime);
+    }
+
     // --- Milestone Release ---
     function releaseMilestone(
         uint256 _campaignId,
@@ -189,6 +224,10 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         }
 
         require(c.currentAmount >= m.amount, "Insufficient funds");
+
+        uint256 releaseTime = milestoneReleaseTime[_campaignId][_milestoneIndex];
+        require(releaseTime > 0, "Release not requested");
+        require(block.timestamp >= releaseTime, "Timelock not expired");
 
         m.isReleased = true;
         c.currentAmount -= m.amount;
