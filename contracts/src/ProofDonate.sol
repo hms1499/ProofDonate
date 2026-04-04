@@ -144,6 +144,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         require(c.isActive, "Campaign not active");
         require(block.timestamp <= c.deadline, "Campaign ended");
         require(_amount > 0, "Amount must be > 0");
+        require(c.currentAmount + _amount <= c.targetAmount, "Exceeds target amount");
 
         require(cUSD.transferFrom(msg.sender, address(this), _amount), "Transfer failed");
 
