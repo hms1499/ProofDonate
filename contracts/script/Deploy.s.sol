@@ -17,7 +17,7 @@ contract DeployProofDonate is Script {
         uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
 
-        ProofDonate proofDonate = new ProofDonate(cUSD);
+        ProofDonate proofDonate = new ProofDonate(cUSD, 200); // 2% platform fee
 
         vm.stopBroadcast();
 

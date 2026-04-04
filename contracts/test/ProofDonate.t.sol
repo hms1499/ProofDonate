@@ -28,7 +28,7 @@ contract ProofDonateTest is Test {
 
     function setUp() public {
         cUSD = new MockERC20();
-        proofDonate = new ProofDonate(address(cUSD));
+        proofDonate = new ProofDonate(address(cUSD), 200); // 2% fee
 
         cUSD.mint(donor1, 10000 ether);
         cUSD.mint(donor2, 10000 ether);
@@ -81,7 +81,7 @@ contract ProofDonateTest is Test {
 
     function test_RevertDeployWithZeroAddress() public {
         vm.expectRevert("Invalid cUSD address");
-        new ProofDonate(address(0));
+        new ProofDonate(address(0), 200);
     }
 
     // ========================
@@ -294,7 +294,7 @@ contract ProofDonateTest is Test {
         assertTrue(ms[0].isReleased);
         assertFalse(ms[1].isReleased);
 
-        assertEq(cUSD.balanceOf(creator) - balBefore, 400 ether);
+        assertEq(cUSD.balanceOf(creator) - balBefore, 392 ether);
 
         ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
         assertEq(c.currentAmount, 100 ether);
@@ -478,5 +478,55 @@ contract ProofDonateTest is Test {
         vm.prank(donor2);
         vm.expectRevert("Exceeds target amount");
         proofDonate.donate(0, 1 ether);
+    }
+
+    // ========================
+    // Platform Fee
+    // ========================
+
+    function test_PlatformFeeIs2Percent() public view {
+        assertEq(proofDonate.platformFeeBps(), 200);
+    }
+
+    function test_FeeDeductedOnMilestoneRelease() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        uint256 creatorBalBefore = cUSD.balanceOf(creator);
+        uint256 treasuryBalBefore = cUSD.balanceOf(owner);
+
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 0); // 400 ether milestone
+
+        // 2% fee = 8 ether, creator gets 392 ether
+        assertEq(cUSD.balanceOf(creator) - creatorBalBefore, 392 ether);
+        assertEq(cUSD.balanceOf(owner) - treasuryBalBefore, 8 ether);
+    }
+
+    function test_FeeCollectedAcrossMultipleMilestones() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate(0, 1000 ether);
+
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 0); // 400 ether
+        vm.prank(creator);
+        proofDonate.releaseMilestone(0, 1); // 300 ether
+
+        // Total fees: 400*0.02 + 300*0.02 = 8 + 6 = 14
+        assertEq(cUSD.balanceOf(owner), 14 ether);
+    }
+
+    function test_OwnerCanUpdateFee() public {
+        proofDonate.updatePlatformFee(500); // 5%
+        assertEq(proofDonate.platformFeeBps(), 500);
+    }
+
+    function test_RevertFeeAboveMax() public {
+        vm.expectRevert("Fee too high");
+        proofDonate.updatePlatformFee(1001); // > 10%
     }
 }

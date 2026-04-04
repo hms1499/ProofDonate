@@ -44,6 +44,9 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     mapping(address => uint256[]) internal _creatorCampaigns;
     mapping(address => bool) public verificationRequested;
 
+    uint256 public platformFeeBps; // basis points, e.g. 200 = 2%
+    uint256 public constant MAX_FEE_BPS = 1000; // 10% max
+
     // --- Events ---
     event CampaignCreated(
         uint256 indexed campaignId,
@@ -57,6 +60,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     event HumanVerified(address indexed user);
     event CampaignCancelled(uint256 indexed campaignId);
     event VerificationRequested(address indexed user);
+    event PlatformFeeUpdated(uint256 newFeeBps);
 
     // --- Modifiers ---
     modifier onlyCampaignCreator(uint256 _campaignId) {
@@ -65,9 +69,17 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Constructor ---
-    constructor(address _cUSD) Ownable(msg.sender) {
+    constructor(address _cUSD, uint256 _feeBps) Ownable(msg.sender) {
         require(_cUSD != address(0), "Invalid cUSD address");
+        require(_feeBps <= MAX_FEE_BPS, "Fee too high");
         cUSD = IERC20(_cUSD);
+        platformFeeBps = _feeBps;
+    }
+
+    function updatePlatformFee(uint256 _newFeeBps) external onlyOwner {
+        require(_newFeeBps <= MAX_FEE_BPS, "Fee too high");
+        platformFeeBps = _newFeeBps;
+        emit PlatformFeeUpdated(_newFeeBps);
     }
 
     // --- Verification ---
@@ -181,7 +193,13 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         m.isReleased = true;
         c.currentAmount -= m.amount;
 
-        require(cUSD.transfer(c.creator, m.amount), "Transfer failed");
+        uint256 fee = (m.amount * platformFeeBps) / 10000;
+        uint256 creatorAmount = m.amount - fee;
+
+        if (fee > 0) {
+            require(cUSD.transfer(owner(), fee), "Fee transfer failed");
+        }
+        require(cUSD.transfer(c.creator, creatorAmount), "Transfer failed");
 
         emit MilestoneReleased(_campaignId, _milestoneIndex, m.amount);
     }
