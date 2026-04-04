@@ -4,6 +4,7 @@ pragma solidity ^0.8.28;
 import "forge-std/Test.sol";
 import "../src/ProofDonate.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract MockERC20 is ERC20 {
     constructor() ERC20("Celo Dollar", "cUSD") {}
@@ -14,6 +15,8 @@ contract MockERC20 is ERC20 {
 }
 
 contract ProofDonateTest is Test {
+    error OwnableUnauthorizedAccount(address account);
+
     ProofDonate public proofDonate;
     MockERC20 public cUSD;
 
@@ -124,7 +127,7 @@ contract ProofDonateTest is Test {
 
     function test_RevertNonOwnerVerify() public {
         vm.prank(donor1);
-        vm.expectRevert("Not owner");
+        vm.expectRevert(abi.encodeWithSelector(OwnableUnauthorizedAccount.selector, donor1));
         proofDonate.verifyHuman(donor2);
     }
 
@@ -374,5 +377,73 @@ contract ProofDonateTest is Test {
         vm.prank(donor1);
         vm.expectRevert("Not campaign creator");
         proofDonate.cancelCampaign(0);
+    }
+
+    // ========================
+    // Ownable2Step
+    // ========================
+
+    function test_OwnerIsDeployer() public view {
+        assertEq(proofDonate.owner(), owner);
+    }
+
+    function test_TransferOwnership2Step() public {
+        proofDonate.transferOwnership(creator);
+        assertEq(proofDonate.owner(), owner);
+
+        vm.prank(creator);
+        proofDonate.acceptOwnership();
+        assertEq(proofDonate.owner(), creator);
+    }
+
+    function test_RevertAcceptOwnershipByNonPending() public {
+        proofDonate.transferOwnership(creator);
+
+        vm.prank(donor1);
+        vm.expectRevert();
+        proofDonate.acceptOwnership();
+    }
+
+    // ========================
+    // Pausable
+    // ========================
+
+    function test_OwnerCanPause() public {
+        proofDonate.pause();
+        assertTrue(proofDonate.paused());
+    }
+
+    function test_OwnerCanUnpause() public {
+        proofDonate.pause();
+        proofDonate.unpause();
+        assertFalse(proofDonate.paused());
+    }
+
+    function test_RevertDonateWhenPaused() public {
+        _createSampleCampaign();
+        proofDonate.pause();
+
+        vm.prank(donor1);
+        vm.expectRevert();
+        proofDonate.donate(0, 100 ether);
+    }
+
+    function test_RevertCreateCampaignWhenPaused() public {
+        proofDonate.pause();
+
+        string[] memory descs = new string[](1);
+        descs[0] = "M1";
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100 ether;
+
+        vm.prank(creator);
+        vm.expectRevert();
+        proofDonate.createCampaign("Test", "Desc", 100 ether, descs, amounts, block.timestamp + 1 days);
+    }
+
+    function test_RevertNonOwnerPause() public {
+        vm.prank(donor1);
+        vm.expectRevert();
+        proofDonate.pause();
     }
 }
