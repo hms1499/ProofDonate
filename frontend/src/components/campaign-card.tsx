@@ -54,10 +54,10 @@ export function CampaignCard({ campaign, campaignId }: CampaignCardProps) {
             </div>
             <div className="flex justify-between text-sm">
               <span className="font-medium">
-                {raised.toFixed(2)} cUSD
+                {raised.toFixed(2)} CELO
               </span>
               <span className="text-muted-foreground">
-                of {target.toFixed(0)} cUSD
+                of {target.toFixed(0)} CELO
               </span>
             </div>
           </div>

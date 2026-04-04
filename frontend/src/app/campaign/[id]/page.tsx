@@ -98,10 +98,10 @@ export default function CampaignDetailPage() {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="font-semibold text-lg">
-                    {raised.toFixed(2)} cUSD raised
+                    {raised.toFixed(2)} CELO raised
                   </span>
                   <span className="text-muted-foreground">
-                    of {target.toFixed(0)} cUSD
+                    of {target.toFixed(0)} CELO
                   </span>
                 </div>
                 <div className="h-3 bg-secondary rounded-full overflow-hidden">
@@ -159,7 +159,7 @@ export default function CampaignDetailPage() {
                           {truncateAddress(d.donor)}
                         </span>
                         <span className="text-sm font-medium">
-                          {Number(formatEther(d.amount)).toFixed(2)} cUSD
+                          {Number(formatEther(d.amount)).toFixed(2)} CELO
                         </span>
                       </div>
                     ))}
