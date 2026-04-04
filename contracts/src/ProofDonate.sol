@@ -3,8 +3,11 @@ pragma solidity ^0.8.28;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/Pausable.sol";
 
-contract ProofDonate is ReentrancyGuard {
+contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     // --- Structs ---
     struct Milestone {
         string description;
@@ -33,7 +36,6 @@ contract ProofDonate is ReentrancyGuard {
     // --- State ---
     IERC20 public immutable cUSD;
     uint256 public campaignCount;
-    address public owner;
 
     mapping(uint256 => Campaign) public campaigns;
     mapping(uint256 => mapping(uint256 => Milestone)) public milestones;
@@ -57,21 +59,15 @@ contract ProofDonate is ReentrancyGuard {
     event VerificationRequested(address indexed user);
 
     // --- Modifiers ---
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not owner");
-        _;
-    }
-
     modifier onlyCampaignCreator(uint256 _campaignId) {
         require(campaigns[_campaignId].creator == msg.sender, "Not campaign creator");
         _;
     }
 
     // --- Constructor ---
-    constructor(address _cUSD) {
+    constructor(address _cUSD) Ownable(msg.sender) {
         require(_cUSD != address(0), "Invalid cUSD address");
         cUSD = IERC20(_cUSD);
-        owner = msg.sender;
     }
 
     // --- Verification ---
@@ -96,7 +92,7 @@ contract ProofDonate is ReentrancyGuard {
         string[] calldata _milestoneDescriptions,
         uint256[] calldata _milestoneAmounts,
         uint256 _deadline
-    ) external returns (uint256) {
+    ) external whenNotPaused returns (uint256) {
         require(verifiedHumans[msg.sender], "Must verify humanity first");
         require(_targetAmount > 0, "Target must be > 0");
         require(_deadline > block.timestamp, "Deadline must be in future");
@@ -143,7 +139,7 @@ contract ProofDonate is ReentrancyGuard {
     }
 
     // --- Donate ---
-    function donate(uint256 _campaignId, uint256 _amount) external nonReentrant {
+    function donate(uint256 _campaignId, uint256 _amount) external nonReentrant whenNotPaused {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
         require(block.timestamp <= c.deadline, "Campaign ended");
@@ -164,7 +160,7 @@ contract ProofDonate is ReentrancyGuard {
     function releaseMilestone(
         uint256 _campaignId,
         uint256 _milestoneIndex
-    ) external nonReentrant onlyCampaignCreator(_campaignId) {
+    ) external nonReentrant whenNotPaused onlyCampaignCreator(_campaignId) {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
         require(_milestoneIndex < c.milestoneCount, "Invalid milestone index");
@@ -195,6 +191,15 @@ contract ProofDonate is ReentrancyGuard {
         require(c.isActive, "Campaign not active");
         c.isActive = false;
         emit CampaignCancelled(_campaignId);
+    }
+
+    // --- Pausable ---
+    function pause() external onlyOwner {
+        _pause();
+    }
+
+    function unpause() external onlyOwner {
+        _unpause();
     }
 
     // --- View Functions ---
