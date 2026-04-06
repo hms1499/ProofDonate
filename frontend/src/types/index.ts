@@ -8,6 +8,7 @@ export interface Campaign {
   isActive: boolean;
   milestoneCount: bigint;
   creatorVerified: boolean;
+  metadataURI: string;
 }
 
 export interface Milestone {
@@ -20,4 +21,12 @@ export interface Donation {
   donor: `0x${string}`;
   amount: bigint;
   timestamp: bigint;
+}
+
+export interface CampaignMetadata {
+  image: string;
+  website?: string;
+  socials?: { twitter?: string; github?: string };
+  documents?: string[];
+  category?: string;
 }

@@ -60,6 +60,7 @@ export const PROOF_DONATE_ABI = [
     inputs: [
       { name: "_title", type: "string", internalType: "string" },
       { name: "_description", type: "string", internalType: "string" },
+      { name: "_metadataURI", type: "string", internalType: "string" },
       { name: "_targetAmount", type: "uint256", internalType: "uint256" },
       { name: "_milestoneDescriptions", type: "string[]", internalType: "string[]" },
       { name: "_milestoneAmounts", type: "uint256[]", internalType: "uint256[]" },
@@ -104,6 +105,7 @@ export const PROOF_DONATE_ABI = [
           { name: "isActive", type: "bool", internalType: "bool" },
           { name: "milestoneCount", type: "uint256", internalType: "uint256" },
           { name: "creatorVerified", type: "bool", internalType: "bool" },
+          { name: "metadataURI", type: "string", internalType: "string" },
         ],
       },
     ],
@@ -264,6 +266,16 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
+    name: "updateMetadataURI",
+    inputs: [
+      { name: "_campaignId", type: "uint256", internalType: "uint256" },
+      { name: "_metadataURI", type: "string", internalType: "string" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "unpause",
     inputs: [],
     outputs: [],
@@ -413,6 +425,15 @@ export const PROOF_DONATE_ABI = [
     anonymous: false,
     inputs: [
       { name: "user", type: "address", indexed: true, internalType: "address" },
+    ],
+  },
+  {
+    type: "event",
+    name: "MetadataUpdated",
+    anonymous: false,
+    inputs: [
+      { name: "campaignId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "metadataURI", type: "string", indexed: false, internalType: "string" },
     ],
   },
   { type: "error", name: "EnforcedPause", inputs: [] },

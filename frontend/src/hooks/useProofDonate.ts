@@ -113,6 +113,7 @@ export function useCreateCampaign() {
   const createCampaign = (
     title: string,
     description: string,
+    metadataURI: string,
     targetAmount: bigint,
     milestoneDescriptions: string[],
     milestoneAmounts: bigint[],
@@ -124,6 +125,7 @@ export function useCreateCampaign() {
       args: [
         title,
         description,
+        metadataURI,
         targetAmount,
         milestoneDescriptions,
         milestoneAmounts,
@@ -279,4 +281,20 @@ export function useVerifyHuman() {
   };
 
   return { verifyHuman, isPending, isConfirming, isSuccess, hash, error };
+}
+
+export function useUpdateMetadataURI() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } =
+    useWaitForTransactionReceipt({ hash });
+
+  const updateMetadataURI = (campaignId: bigint, metadataURI: string) => {
+    writeContract({
+      ...contractConfig,
+      functionName: "updateMetadataURI",
+      args: [campaignId, metadataURI],
+    });
+  };
+
+  return { updateMetadataURI, isPending, isConfirming, isSuccess, hash, error };
 }
