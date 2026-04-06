@@ -9,7 +9,8 @@ import {
   useIsVerified,
   useCampaignCount,
 } from "@/hooks/useProofDonate";
-import { Plus, Trash2, Loader2, ShieldAlert, ArrowRight, CheckCircle2 } from "lucide-react";
+import { uploadImage, uploadMetadata } from "@/lib/pinata";
+import { Plus, Trash2, Loader2, ShieldAlert, ArrowRight, CheckCircle2, ImagePlus } from "lucide-react";
 import Link from "next/link";
 
 interface MilestoneInput {
@@ -34,6 +35,14 @@ export default function CreateCampaignPage() {
     { description: "", amount: "" },
   ]);
 
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [website, setWebsite] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [github, setGithub] = useState("");
+  const [category, setCategory] = useState("");
+
   const { createCampaign, isPending, isConfirming, isSuccess, error } = useCreateCampaign();
 
   useEffect(() => {
@@ -54,6 +63,13 @@ export default function CreateCampaignPage() {
     setMilestones(updated);
   };
 
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setImageFile(file);
+    setImagePreview(URL.createObjectURL(file));
+  };
+
   const milestoneSum = milestones.reduce((s, m) => s + (parseFloat(m.amount) || 0), 0);
   const targetNum = parseFloat(targetAmount) || 0;
   const milestoneMismatch = targetNum > 0 && milestoneSum > 0 && Math.abs(milestoneSum - targetNum) > 0.001;
@@ -61,19 +77,45 @@ export default function CreateCampaignPage() {
     title.trim() &&
     description.trim() &&
     targetNum > 0 &&
+    imageFile &&
     milestones.every((m) => m.description.trim() && parseFloat(m.amount) > 0) &&
     !milestoneMismatch;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isFormValid) return;
-    const deadline = BigInt(Math.floor(Date.now() / 1000) + parseInt(deadlineDays) * 86400);
-    createCampaign(
-      title, description, parseEther(targetAmount),
-      milestones.map((m) => m.description),
-      milestones.map((m) => parseEther(m.amount)),
-      deadline
-    );
+    if (!isFormValid || !imageFile) return;
+
+    setIsUploading(true);
+    try {
+      const imageCid = await uploadImage(imageFile);
+
+      const metadata: Record<string, unknown> = { image: imageCid };
+      if (website.trim()) metadata.website = website.trim();
+      if (twitter.trim() || github.trim()) {
+        metadata.socials = {
+          ...(twitter.trim() && { twitter: twitter.trim() }),
+          ...(github.trim() && { github: github.trim() }),
+        };
+      }
+      if (category.trim()) metadata.category = category.trim();
+
+      const metadataURI = await uploadMetadata(metadata as Parameters<typeof uploadMetadata>[0]);
+
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + parseInt(deadlineDays) * 86400);
+      createCampaign(
+        title,
+        description,
+        metadataURI,
+        parseEther(targetAmount),
+        milestones.map((m) => m.description),
+        milestones.map((m) => parseEther(m.amount)),
+        deadline
+      );
+    } catch (err) {
+      console.error("Upload failed:", err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // ── Gate: not connected ──
@@ -139,10 +181,41 @@ export default function CreateCampaignPage() {
             {/* ── Left: Main form ── */}
             <div className="lg:col-span-2 space-y-6">
 
-              {/* Campaign Details */}
+              {/* Campaign Image */}
               <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">01</span>
+                  <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Image</h2>
+                </div>
+
+                <label className="block cursor-pointer">
+                  {imagePreview ? (
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <p className="text-white text-sm">Click to change</p>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="border-2 border-dashed border-white/10 rounded-lg h-48 flex flex-col items-center justify-center hover:border-[#35D07F]/40 transition-colors">
+                      <ImagePlus className="w-8 h-8 text-white/20 mb-2" />
+                      <p className="text-sm text-white/30">Click to upload campaign image</p>
+                      <p className="text-xs text-white/15 mt-1">PNG, JPG, WebP (max 5MB)</p>
+                    </div>
+                  )}
+                  <input
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={handleImageSelect}
+                    className="hidden"
+                  />
+                </label>
+              </div>
+
+              {/* Campaign Details */}
+              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-mono text-xs text-white/30 uppercase tracking-widest">02</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Details</h2>
                 </div>
 
@@ -196,7 +269,7 @@ export default function CreateCampaignPage() {
               <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs text-white/30 uppercase tracking-widest">02</span>
+                    <span className="font-mono text-xs text-white/30 uppercase tracking-widest">03</span>
                     <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Milestones</h2>
                   </div>
                   <button
@@ -256,6 +329,45 @@ export default function CreateCampaignPage() {
                     </p>
                   </div>
                 )}
+              </div>
+
+              {/* Optional Info */}
+              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
+                <div className="flex items-center gap-3 mb-2">
+                  <span className="font-mono text-xs text-white/30 uppercase tracking-widest">04</span>
+                  <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Additional Info</h2>
+                  <span className="text-xs text-white/15">(optional)</span>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Website</label>
+                  <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://your-project.com" className={inputCls} />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Twitter</label>
+                    <input type="url" value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="https://twitter.com/..." className={inputCls} />
+                  </div>
+                  <div>
+                    <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">GitHub</label>
+                    <input type="url" value={github} onChange={(e) => setGithub(e.target.value)} placeholder="https://github.com/..." className={inputCls} />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Category</label>
+                  <select value={category} onChange={(e) => setCategory(e.target.value)} className={inputCls}>
+                    <option value="">Select category</option>
+                    <option value="education">Education</option>
+                    <option value="charity">Charity</option>
+                    <option value="environment">Environment</option>
+                    <option value="health">Health</option>
+                    <option value="technology">Technology</option>
+                    <option value="community">Community</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
 
               {error && (
@@ -321,11 +433,13 @@ export default function CreateCampaignPage() {
               {/* Submit */}
               <button
                 type="submit"
-                disabled={!isFormValid || isPending || isConfirming}
+                disabled={!isFormValid || isPending || isConfirming || isUploading}
                 className="w-full inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-4 rounded-xl text-sm hover:bg-[#2bb86e] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {isPending || isConfirming ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Creating on-chain…</>
+                ) : isUploading ? (
+                  <><Loader2 className="w-4 h-4 animate-spin" /> Uploading to IPFS…</>
                 ) : (
                   <><CheckCircle2 className="w-4 h-4" /> Launch Campaign</>
                 )}
