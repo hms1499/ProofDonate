@@ -24,6 +24,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         bool isActive;
         uint256 milestoneCount;
         bool creatorVerified;
+        string metadataURI;
     }
 
     struct Donation {
@@ -111,12 +112,14 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     function createCampaign(
         string calldata _title,
         string calldata _description,
+        string calldata _metadataURI,
         uint256 _targetAmount,
         string[] calldata _milestoneDescriptions,
         uint256[] calldata _milestoneAmounts,
         uint256 _deadline
     ) external whenNotPaused returns (uint256) {
         require(verifiedHumans[msg.sender], "Must verify humanity first");
+        require(bytes(_metadataURI).length > 0, "Metadata URI required");
         require(_targetAmount > 0, "Target must be > 0");
         require(_deadline > block.timestamp, "Deadline must be in future");
         require(
@@ -145,6 +148,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         c.isActive = true;
         c.milestoneCount = _milestoneDescriptions.length;
         c.creatorVerified = true;
+        c.metadataURI = _metadataURI;
 
         for (uint256 i = 0; i < _milestoneDescriptions.length; i++) {
             milestones[campaignId][i] = Milestone({

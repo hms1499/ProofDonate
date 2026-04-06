@@ -41,6 +41,7 @@ contract ProofDonateTest is Test {
         return proofDonate.createCampaign(
             "Help Build a School",
             "Building a school in rural area",
+            "ipfs://QmTestMetadata123",
             1000 ether,
             descs,
             amounts,
@@ -159,7 +160,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(unverified);
         vm.expectRevert("Must verify humanity first");
-        proofDonate.createCampaign("Test", "Desc", 100 ether, descs, amounts, block.timestamp + 1 days);
+        proofDonate.createCampaign("Test", "Desc", "ipfs://QmTest", 100 ether, descs, amounts, block.timestamp + 1 days);
     }
 
     function test_RevertMismatchedMilestoneSums() public {
@@ -172,7 +173,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(creator);
         vm.expectRevert("Milestones must sum to target");
-        proofDonate.createCampaign("Test", "Desc", 1000 ether, descs, amounts, block.timestamp + 1 days);
+        proofDonate.createCampaign("Test", "Desc", "ipfs://QmTest", 1000 ether, descs, amounts, block.timestamp + 1 days);
     }
 
     function test_RevertPastDeadline() public {
@@ -183,7 +184,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(creator);
         vm.expectRevert("Deadline must be in future");
-        proofDonate.createCampaign("Test", "Desc", 100 ether, descs, amounts, 1);
+        proofDonate.createCampaign("Test", "Desc", "ipfs://QmTest", 100 ether, descs, amounts, 1);
     }
 
     function test_RevertZeroMilestones() public {
@@ -192,7 +193,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(creator);
         vm.expectRevert("1-10 milestones required");
-        proofDonate.createCampaign("Test", "Desc", 100 ether, descs, amounts, block.timestamp + 1 days);
+        proofDonate.createCampaign("Test", "Desc", "ipfs://QmTest", 100 ether, descs, amounts, block.timestamp + 1 days);
     }
 
     // ========================
@@ -456,7 +457,7 @@ contract ProofDonateTest is Test {
 
         vm.prank(creator);
         vm.expectRevert();
-        proofDonate.createCampaign("Test", "Desc", 100 ether, descs, amounts, block.timestamp + 1 days);
+        proofDonate.createCampaign("Test", "Desc", "ipfs://QmTest", 100 ether, descs, amounts, block.timestamp + 1 days);
     }
 
     function test_RevertNonOwnerPause() public {
@@ -789,6 +790,27 @@ contract ProofDonateTest is Test {
 
     function test_MinDonationIs0Point02Ether() public view {
         assertEq(proofDonate.MIN_DONATION(), 0.02 ether);
+    }
+
+    // ========================
+    // MetadataURI
+    // ========================
+
+    function test_CreateCampaignStoresMetadataURI() public {
+        _createSampleCampaign();
+        ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
+        assertEq(c.metadataURI, "ipfs://QmTestMetadata123");
+    }
+
+    function test_RevertCreateCampaignEmptyMetadataURI() public {
+        string[] memory descs = new string[](1);
+        descs[0] = "M1";
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = 100 ether;
+
+        vm.prank(creator);
+        vm.expectRevert("Metadata URI required");
+        proofDonate.createCampaign("Test", "Desc", "", 100 ether, descs, amounts, block.timestamp + 1 days);
     }
 
     // ========================
