@@ -1,13 +1,12 @@
-import { PinataSDK } from "pinata";
-
-const pinata = new PinataSDK({
-  pinataJwt: process.env.NEXT_PUBLIC_PINATA_JWT!,
-  pinataGateway: process.env.NEXT_PUBLIC_PINATA_GATEWAY!,
-});
-
 export async function uploadImage(file: File): Promise<string> {
-  const result = await pinata.upload.public.file(file);
-  return `ipfs://${result.cid}`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const res = await fetch("/api/upload", { method: "POST", body: formData });
+  if (!res.ok) throw new Error("Image upload failed");
+
+  const { uri } = await res.json();
+  return uri;
 }
 
 export async function uploadMetadata(metadata: {
@@ -17,8 +16,15 @@ export async function uploadMetadata(metadata: {
   documents?: string[];
   category?: string;
 }): Promise<string> {
-  const result = await pinata.upload.public.json(metadata);
-  return `ipfs://${result.cid}`;
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(metadata),
+  });
+  if (!res.ok) throw new Error("Metadata upload failed");
+
+  const { uri } = await res.json();
+  return uri;
 }
 
 export function ipfsToHttp(ipfsUri: string): string {

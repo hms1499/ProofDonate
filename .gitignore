@@ -7,7 +7,7 @@ node_modules/
 dist/
 build/
 
-# Environment variables
+# Environment variables (keep .env.example as template)
 .env
 .env.local
 .env.development.local
