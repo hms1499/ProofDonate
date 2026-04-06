@@ -75,6 +75,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     event VerificationRequested(address indexed user);
     event PlatformFeeUpdated(uint256 newFeeBps);
     event RefundClaimed(uint256 indexed campaignId, address indexed donor, uint256 amount);
+    event MetadataUpdated(uint256 indexed campaignId, string metadataURI);
 
     // --- Modifiers ---
     modifier onlyCampaignCreator(uint256 _campaignId) {
@@ -259,6 +260,18 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         require(c.isActive, "Campaign not active");
         c.isActive = false;
         emit CampaignCancelled(_campaignId);
+    }
+
+    // --- Update Metadata ---
+    function updateMetadataURI(uint256 _campaignId, string calldata _metadataURI)
+        external onlyCampaignCreator(_campaignId)
+    {
+        Campaign storage c = campaigns[_campaignId];
+        require(c.isActive, "Campaign not active");
+        require(c.currentAmount == 0, "Cannot update after donations");
+        require(bytes(_metadataURI).length > 0, "Metadata URI required");
+        c.metadataURI = _metadataURI;
+        emit MetadataUpdated(_campaignId, _metadataURI);
     }
 
     // --- Refund ---

@@ -802,6 +802,64 @@ contract ProofDonateTest is Test {
         assertEq(c.metadataURI, "ipfs://QmTestMetadata123");
     }
 
+    function test_UpdateMetadataURI() public {
+        _createSampleCampaign();
+
+        vm.prank(creator);
+        proofDonate.updateMetadataURI(0, "ipfs://QmUpdatedMetadata456");
+
+        ProofDonate.Campaign memory c = proofDonate.getCampaign(0);
+        assertEq(c.metadataURI, "ipfs://QmUpdatedMetadata456");
+    }
+
+    function test_RevertUpdateMetadataURIAfterDonation() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        proofDonate.donate{value: 1 ether}(0);
+
+        vm.prank(creator);
+        vm.expectRevert("Cannot update after donations");
+        proofDonate.updateMetadataURI(0, "ipfs://QmUpdatedMetadata456");
+    }
+
+    function test_RevertUpdateMetadataURIByNonCreator() public {
+        _createSampleCampaign();
+
+        vm.prank(donor1);
+        vm.expectRevert("Not campaign creator");
+        proofDonate.updateMetadataURI(0, "ipfs://QmUpdatedMetadata456");
+    }
+
+    function test_RevertUpdateMetadataURIEmptyString() public {
+        _createSampleCampaign();
+
+        vm.prank(creator);
+        vm.expectRevert("Metadata URI required");
+        proofDonate.updateMetadataURI(0, "");
+    }
+
+    function test_RevertUpdateMetadataURICancelledCampaign() public {
+        _createSampleCampaign();
+
+        vm.prank(creator);
+        proofDonate.cancelCampaign(0);
+
+        vm.prank(creator);
+        vm.expectRevert("Campaign not active");
+        proofDonate.updateMetadataURI(0, "ipfs://QmUpdatedMetadata456");
+    }
+
+    function test_UpdateMetadataURIEmitsEvent() public {
+        _createSampleCampaign();
+
+        vm.expectEmit(true, false, false, true);
+        emit ProofDonate.MetadataUpdated(0, "ipfs://QmUpdatedMetadata456");
+
+        vm.prank(creator);
+        proofDonate.updateMetadataURI(0, "ipfs://QmUpdatedMetadata456");
+    }
+
     function test_RevertCreateCampaignEmptyMetadataURI() public {
         string[] memory descs = new string[](1);
         descs[0] = "M1";
