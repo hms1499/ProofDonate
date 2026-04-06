@@ -12,7 +12,9 @@ import {
   useDonations,
 } from "@/hooks/useProofDonate";
 import { truncateAddress } from "@/lib/app-utils";
-import { CheckCircle, Clock, ArrowLeft } from "lucide-react";
+import { useCampaignMetadata } from "@/hooks/useCampaignMetadata";
+import { ipfsToHttp } from "@/lib/pinata";
+import { CheckCircle, Clock, ArrowLeft, Globe, Twitter, Github } from "lucide-react";
 import Link from "next/link";
 import type { Campaign, Milestone, Donation } from "@/types";
 
@@ -24,6 +26,7 @@ export default function CampaignDetailPage() {
   const { data: campaign, isLoading, refetch: refetchCampaign } = useCampaign(campaignId);
   const { data: milestones, refetch: refetchMilestones } = useMilestones(campaignId);
   const { data: donations, refetch: refetchDonations } = useDonations(campaignId);
+  const { metadata } = useCampaignMetadata((campaign as Campaign)?.metadataURI);
 
   if (isLoading) {
     return (
@@ -71,6 +74,15 @@ export default function CampaignDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Main content */}
         <div className="lg:col-span-2 space-y-6">
+          {metadata?.image && (
+            <div className="rounded-lg overflow-hidden">
+              <img
+                src={ipfsToHttp(metadata.image)}
+                alt={c.title}
+                className="w-full h-64 object-cover"
+              />
+            </div>
+          )}
           <div>
             <div className="flex items-start gap-3 mb-2">
               <h1 className="text-3xl font-bold">{c.title}</h1>
@@ -91,6 +103,44 @@ export default function CampaignDetailPage() {
           <p className="text-foreground/80 leading-relaxed">
             {c.description}
           </p>
+
+          {metadata && (metadata.website || metadata.socials) && (
+            <div className="flex flex-wrap items-center gap-3">
+              {metadata.website && (
+                <a
+                  href={metadata.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Globe className="h-4 w-4" />
+                  Website
+                </a>
+              )}
+              {metadata.socials?.twitter && (
+                <a
+                  href={metadata.socials.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Twitter className="h-4 w-4" />
+                  Twitter
+                </a>
+              )}
+              {metadata.socials?.github && (
+                <a
+                  href={metadata.socials.github}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Github className="h-4 w-4" />
+                  GitHub
+                </a>
+              )}
+            </div>
+          )}
 
           {/* Progress */}
           <Card>

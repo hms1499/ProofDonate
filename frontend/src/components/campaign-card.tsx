@@ -4,6 +4,8 @@ import Link from "next/link";
 import { formatEther } from "viem";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { truncateAddress } from "@/lib/app-utils";
+import { useCampaignMetadata } from "@/hooks/useCampaignMetadata";
+import { ipfsToHttp } from "@/lib/pinata";
 import { CheckCircle, Clock, Target } from "lucide-react";
 import type { Campaign } from "@/types";
 
@@ -22,10 +24,20 @@ export function CampaignCard({ campaign, campaignId }: CampaignCardProps) {
     0,
     Math.ceil((deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24))
   );
+  const { metadata } = useCampaignMetadata(campaign.metadataURI);
 
   return (
     <Link href={`/campaign/${campaignId}`}>
       <Card className="hover:shadow-md transition-shadow cursor-pointer h-full">
+        {metadata?.image && (
+          <div className="h-40 overflow-hidden">
+            <img
+              src={ipfsToHttp(metadata.image)}
+              alt={campaign.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-2">
             <CardTitle className="text-lg line-clamp-2">
