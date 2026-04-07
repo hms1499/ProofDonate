@@ -71,7 +71,7 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
                 chainName: "Celo",
                 nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
                 rpcUrls: ["https://forno.celo.org"],
-                blockExplorerUrls: ["https://celoscan.io/"],
+                blockExplorerUrls: ["https://celo.blockscout.com/"],
               },
             ],
           });
@@ -93,7 +93,11 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider initialChain={celo}>
-          <WalletProviderInner>{children}</WalletProviderInner>
+          {mounted ? (
+            <WalletProviderInner>{children}</WalletProviderInner>
+          ) : (
+            children
+          )}
         </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
