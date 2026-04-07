@@ -758,16 +758,10 @@ contract ProofDonateTest is Test {
         vm.prank(creator);
         proofDonate.requestMilestoneRelease(0, 0);
 
-        // Cancel campaign
+        // Cancel should revert because milestone release is pending
         vm.prank(creator);
+        vm.expectRevert("Cannot cancel: milestone release pending");
         proofDonate.cancelCampaign(0);
-
-        // Try to release after timelock - should fail because cancelled
-        vm.warp(block.timestamp + 3 days + 1);
-
-        vm.prank(creator);
-        vm.expectRevert("Campaign not active");
-        proofDonate.releaseMilestone(0, 0);
     }
 
     function test_RevertRefundNonDonor() public {

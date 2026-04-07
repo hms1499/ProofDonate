@@ -2,15 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { parseEther } from "viem";
-import { Button } from "@/components/ui/button";
 import { useDonate } from "@/hooks/useProofDonate";
 import { useAccount } from "wagmi";
-import { Loader2 } from "lucide-react";
+import { Loader2, Wallet } from "lucide-react";
 
 interface DonateFormProps {
   campaignId: bigint;
   onSuccess?: () => void;
 }
+
+const QUICK_AMOUNTS = ["0.1", "0.5", "1", "5"];
 
 export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
   const [amount, setAmount] = useState("");
@@ -33,9 +34,14 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
 
   if (!isConnected) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Connect your wallet to donate.
-      </p>
+      <div className="flex flex-col items-center gap-3 py-4">
+        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+          <Wallet className="h-4 w-4 text-white/30" />
+        </div>
+        <p className="text-sm text-white/40 text-center">
+          Connect your wallet to donate.
+        </p>
+      </div>
     );
   }
 
@@ -48,9 +54,29 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
   const isProcessing = isDonating || isDonateConfirming;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
+      {/* Quick amount buttons */}
+      <div className="grid grid-cols-4 gap-2">
+        {QUICK_AMOUNTS.map((qa) => (
+          <button
+            key={qa}
+            type="button"
+            onClick={() => setAmount(qa)}
+            disabled={isProcessing}
+            className={`py-2 rounded-lg text-xs font-mono transition-all ${
+              amount === qa
+                ? "bg-[#35D07F]/15 border border-[#35D07F]/40 text-[#35D07F]"
+                : "bg-white/5 border border-white/8 text-white/50 hover:border-white/15 hover:text-white/70"
+            } disabled:opacity-40`}
+          >
+            {qa}
+          </button>
+        ))}
+      </div>
+
+      {/* Custom amount input */}
       <div>
-        <label className="text-sm font-medium mb-1 block">
+        <label className="text-xs font-mono text-white/30 uppercase tracking-widest mb-2 block">
           Amount (CELO)
         </label>
         <input
@@ -61,30 +87,35 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
           disabled={isProcessing}
-          className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#35D07F]/50 focus:ring-1 focus:ring-[#35D07F]/20 disabled:opacity-50 font-mono transition-colors"
         />
-        <p className="text-xs text-muted-foreground mt-1">Minimum: 0.02 CELO</p>
+        <p className="text-[10px] text-white/20 mt-1.5 font-mono">
+          Minimum: 0.02 CELO
+        </p>
       </div>
 
-      <Button
+      {/* Donate button */}
+      <button
         onClick={handleDonate}
         disabled={isProcessing || !amount || parsedAmount === 0n}
-        className="w-full"
+        className="w-full group inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#2bb86e] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {isDonating || isDonateConfirming ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Donating...
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Confirming...
           </>
         ) : (
-          "Donate"
+          "Donate Now"
         )}
-      </Button>
+      </button>
 
       {isDonateSuccess && (
-        <p className="text-sm text-green-600 font-medium">
-          Donation successful! Thank you.
-        </p>
+        <div className="text-center py-2 px-3 rounded-lg bg-[#35D07F]/10 border border-[#35D07F]/20">
+          <p className="text-sm text-[#35D07F] font-medium">
+            Donation successful! Thank you.
+          </p>
+        </div>
       )}
     </div>
   );

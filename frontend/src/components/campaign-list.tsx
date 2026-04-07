@@ -15,7 +15,7 @@ export function CampaignList() {
         {[1, 2, 3].map((i) => (
           <div
             key={i}
-            className="h-64 rounded-lg bg-secondary/50 animate-pulse"
+            className="h-80 rounded-2xl bg-white/5 border border-white/8 animate-pulse"
           />
         ))}
       </div>
@@ -53,12 +53,13 @@ export function CampaignList() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {campaigns.map(
-        (item) =>
+        (item, i) =>
           item.campaign && (
             <CampaignCard
               key={item.id}
               campaign={item.campaign}
               campaignId={item.id}
+              index={i}
             />
           )
       )}

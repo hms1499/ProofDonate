@@ -58,7 +58,13 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     mapping(uint256 => mapping(address => bool)) public hasRefunded;
     mapping(uint256 => uint256) public totalReleased;
 
-    event MilestoneReleaseRequested(uint256 indexed campaignId, uint256 milestoneIndex, uint256 releaseTime);
+    // FIX: Snapshot for fair refund calculation
+    mapping(uint256 => uint256) public refundSnapshotAmount;
+    mapping(uint256 => uint256) public refundSnapshotTotal;
+
+    event MilestoneReleaseRequested(
+        uint256 indexed campaignId, uint256 milestoneIndex, uint256 releaseTime
+    );
 
     // --- Events ---
     event CampaignCreated(
@@ -185,10 +191,11 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Milestone Release Request ---
-    function requestMilestoneRelease(
-        uint256 _campaignId,
-        uint256 _milestoneIndex
-    ) external whenNotPaused onlyCampaignCreator(_campaignId) {
+    function requestMilestoneRelease(uint256 _campaignId, uint256 _milestoneIndex)
+        external
+        whenNotPaused
+        onlyCampaignCreator(_campaignId)
+    {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
         require(_milestoneIndex < c.milestoneCount, "Invalid milestone index");
@@ -213,10 +220,12 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Milestone Release ---
-    function releaseMilestone(
-        uint256 _campaignId,
-        uint256 _milestoneIndex
-    ) external nonReentrant whenNotPaused onlyCampaignCreator(_campaignId) {
+    function releaseMilestone(uint256 _campaignId, uint256 _milestoneIndex)
+        external
+        nonReentrant
+        whenNotPaused
+        onlyCampaignCreator(_campaignId)
+    {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
         require(_milestoneIndex < c.milestoneCount, "Invalid milestone index");
@@ -237,6 +246,7 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         require(releaseTime > 0, "Release not requested");
         require(block.timestamp >= releaseTime, "Timelock not expired");
 
+        // FIX: Update state BEFORE external calls (CEI pattern)
         m.isReleased = true;
         c.currentAmount -= m.amount;
         totalReleased[_campaignId] += m.amount;
@@ -255,16 +265,31 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     }
 
     // --- Cancel ---
+    // FIX: Cannot cancel if any milestone release is pending timelock
     function cancelCampaign(uint256 _campaignId) external onlyCampaignCreator(_campaignId) {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
+
+        // Block cancel if any milestone release is pending
+        for (uint256 i = 0; i < c.milestoneCount; i++) {
+            uint256 rt = milestoneReleaseTime[_campaignId][i];
+            if (rt > 0 && !milestones[_campaignId][i].isReleased) {
+                revert("Cannot cancel: milestone release pending");
+            }
+        }
+
         c.isActive = false;
+
+        // FIX: Snapshot current refundable state for fair distribution
+        _snapshotRefund(_campaignId, c);
+
         emit CampaignCancelled(_campaignId);
     }
 
     // --- Update Metadata ---
     function updateMetadataURI(uint256 _campaignId, string calldata _metadataURI)
-        external onlyCampaignCreator(_campaignId)
+        external
+        onlyCampaignCreator(_campaignId)
     {
         Campaign storage c = campaigns[_campaignId];
         require(c.isActive, "Campaign not active");
@@ -274,7 +299,16 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         emit MetadataUpdated(_campaignId, _metadataURI);
     }
 
+    // --- Internal: Snapshot refund amounts ---
+    function _snapshotRefund(uint256 _campaignId, Campaign storage c) internal {
+        if (refundSnapshotAmount[_campaignId] == 0 && c.currentAmount > 0) {
+            refundSnapshotAmount[_campaignId] = c.currentAmount;
+            refundSnapshotTotal[_campaignId] = c.currentAmount + totalReleased[_campaignId];
+        }
+    }
+
     // --- Refund ---
+    // FIX: Use snapshot for fair proportional refund (no rounding drift)
     function claimRefund(uint256 _campaignId) external nonReentrant {
         Campaign storage c = campaigns[_campaignId];
 
@@ -287,10 +321,21 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         uint256 donated = donorContributions[_campaignId][msg.sender];
         require(donated > 0, "No donation found");
 
-        // totalDonated = what's in contract + what's been released
-        uint256 totalDonated = c.currentAmount + totalReleased[_campaignId];
-        // Each donor gets back their proportional share of remaining funds
-        uint256 refundAmount = (donated * c.currentAmount) / totalDonated;
+        // FIX: Take snapshot on first refund if not already done (for expired campaigns)
+        if (refundSnapshotAmount[_campaignId] == 0 && c.currentAmount > 0) {
+            refundSnapshotAmount[_campaignId] = c.currentAmount;
+            refundSnapshotTotal[_campaignId] = c.currentAmount + totalReleased[_campaignId];
+        }
+
+        uint256 snapshotAmount = refundSnapshotAmount[_campaignId];
+        uint256 snapshotTotal = refundSnapshotTotal[_campaignId];
+
+        // FIX: Guard against division by zero
+        require(snapshotTotal > 0 && snapshotAmount > 0, "No funds to refund");
+
+        // FIX: Calculate from frozen snapshot — every donor gets the same fair ratio
+        uint256 refundAmount = (donated * snapshotAmount) / snapshotTotal;
+        require(refundAmount > 0, "Refund amount is zero");
 
         hasRefunded[_campaignId][msg.sender] = true;
         c.currentAmount -= refundAmount;

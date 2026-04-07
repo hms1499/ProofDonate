@@ -6,7 +6,7 @@ import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { WagmiProvider, createConfig, createStorage, http, useAccount, useConnect } from "wagmi";
-import { celo, celoSepolia } from "wagmi/chains";
+import { celo } from "wagmi/chains";
 import { ConnectButton } from "./connect-button";
 
 const connectors = connectorsForWallets(
@@ -23,11 +23,10 @@ const connectors = connectorsForWallets(
 );
 
 const wagmiConfig = createConfig({
-  chains: [celo, celoSepolia],
+  chains: [celo],
   connectors,
   transports: {
     [celo.id]: http(),
-    [celoSepolia.id]: http(),
   },
   storage: createStorage({
     storage: typeof window !== "undefined" ? window.localStorage : undefined,
@@ -52,28 +51,27 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
     }
   }, [connect, connectors]);
 
-  // Auto add & switch to Celo Sepolia via wallet provider directly
+  // Auto add & switch to Celo Mainnet
   useEffect(() => {
-    if (!isConnected || chainId === celoSepolia.id || !window.ethereum) return;
+    if (!isConnected || chainId === celo.id || !window.ethereum) return;
 
-    const switchToCeloSepolia = async () => {
+    const switchToCelo = async () => {
       try {
         await window.ethereum.request({
           method: "wallet_switchEthereumChain",
-          params: [{ chainId: `0x${celoSepolia.id.toString(16)}` }],
+          params: [{ chainId: `0x${celo.id.toString(16)}` }],
         });
       } catch (switchError: any) {
-        // Error code 4902 = chain not added yet
         if (switchError.code === 4902) {
           await window.ethereum.request({
             method: "wallet_addEthereumChain",
             params: [
               {
-                chainId: `0x${celoSepolia.id.toString(16)}`,
-                chainName: "Celo Sepolia Testnet",
-                nativeCurrency: { name: "CELO", symbol: "S-CELO", decimals: 18 },
-                rpcUrls: ["https://forno.celo-sepolia.celo-testnet.org"],
-                blockExplorerUrls: ["https://celo-sepolia.blockscout.com/"],
+                chainId: `0x${celo.id.toString(16)}`,
+                chainName: "Celo",
+                nativeCurrency: { name: "CELO", symbol: "CELO", decimals: 18 },
+                rpcUrls: ["https://forno.celo.org"],
+                blockExplorerUrls: ["https://celoscan.io/"],
               },
             ],
           });
@@ -81,7 +79,7 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
       }
     };
 
-    switchToCeloSepolia();
+    switchToCelo();
   }, [isConnected, chainId]);
 
   return <>{children}</>;
@@ -94,7 +92,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider initialChain={celoSepolia}>
+        <RainbowKitProvider initialChain={celo}>
           <WalletProviderInner>{children}</WalletProviderInner>
         </RainbowKitProvider>
       </QueryClientProvider>
