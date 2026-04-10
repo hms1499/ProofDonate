@@ -120,6 +120,13 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
+    name: "getPendingUsers",
+    inputs: [],
+    outputs: [{ name: "", type: "address[]", internalType: "address[]" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
     name: "getDonationCount",
     inputs: [{ name: "_campaignId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],

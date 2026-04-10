@@ -45,6 +45,10 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
     mapping(address => uint256[]) internal _creatorCampaigns;
     mapping(address => bool) public verificationRequested;
 
+    // Pending verification list (for admin to read without scanning events)
+    address[] internal _pendingUsers;
+    mapping(address => uint256) internal _pendingUserIndex; // 1-based index
+
     uint256 public platformFeeBps; // basis points, e.g. 200 = 2%
     uint256 public constant MAX_FEE_BPS = 1000; // 10% max
 
@@ -106,12 +110,29 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
         require(!verifiedHumans[msg.sender], "Already verified");
         require(!verificationRequested[msg.sender], "Already requested");
         verificationRequested[msg.sender] = true;
+        _pendingUsers.push(msg.sender);
+        _pendingUserIndex[msg.sender] = _pendingUsers.length; // 1-based
         emit VerificationRequested(msg.sender);
     }
 
     function verifyHuman(address _user) external onlyOwner {
         require(_user != address(0), "Invalid address");
         verifiedHumans[_user] = true;
+
+        // Remove from pending list (swap-and-pop)
+        uint256 idx = _pendingUserIndex[_user];
+        if (idx > 0) {
+            uint256 lastIdx = _pendingUsers.length;
+            if (idx != lastIdx) {
+                address lastUser = _pendingUsers[lastIdx - 1];
+                _pendingUsers[idx - 1] = lastUser;
+                _pendingUserIndex[lastUser] = idx;
+            }
+            _pendingUsers.pop();
+            delete _pendingUserIndex[_user];
+            delete verificationRequested[_user];
+        }
+
         emit HumanVerified(_user);
     }
 
@@ -379,6 +400,10 @@ contract ProofDonate is ReentrancyGuard, Ownable2Step, Pausable {
 
     function getCreatorCampaigns(address _creator) external view returns (uint256[] memory) {
         return _creatorCampaigns[_creator];
+    }
+
+    function getPendingUsers() external view returns (address[] memory) {
+        return _pendingUsers;
     }
 
     receive() external payable {}

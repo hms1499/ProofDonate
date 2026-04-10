@@ -1,14 +1,14 @@
 "use client";
 
 import { useAccount } from "wagmi";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   useContractOwner,
   useVerifyHuman,
   useIsVerified,
 } from "@/hooks/useProofDonate";
-import { PROOF_DONATE_ADDRESS } from "@/lib/contracts";
+import { PROOF_DONATE_ADDRESS, PROOF_DONATE_ABI } from "@/lib/contracts";
 import { truncateAddress } from "@/lib/app-utils";
 import {
   ShieldAlert,
@@ -24,19 +24,24 @@ import {
   Terminal,
 } from "lucide-react";
 import { usePublicClient } from "wagmi";
-import { parseAbiItem } from "viem";
 
 /* ── Row component ─────────────────────────────────────────────── */
 
 function PendingRequestRow({
   address: userAddress,
   index,
+  onVerified,
 }: {
   address: `0x${string}`;
   index: number;
+  onVerified: () => void;
 }) {
   const { data: isVerified, isLoading } = useIsVerified(userAddress);
   const { verifyHuman, isPending, isConfirming, isSuccess } = useVerifyHuman();
+
+  useEffect(() => {
+    if (isSuccess) onVerified();
+  }, [isSuccess, onVerified]);
 
   const status = isVerified || isSuccess ? "approved" : "pending";
 
@@ -203,40 +208,38 @@ export default function AdminPage() {
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [filterStatus, setFilterStatus] = useState<"all" | "pending" | "approved">("all");
+  const [fetchVersion, setFetchVersion] = useState(0);
 
   const isOwner =
     address && ownerAddress
       ? address.toLowerCase() === (ownerAddress as string).toLowerCase()
       : false;
 
+  const refetchPending = useCallback(() => {
+    setFetchVersion((v) => v + 1);
+  }, []);
+
   useEffect(() => {
     async function fetchRequests() {
       if (!publicClient || !isOwner) return;
 
       try {
-        const logs = await publicClient.getLogs({
+        const pending = await publicClient.readContract({
           address: PROOF_DONATE_ADDRESS,
-          event: parseAbiItem(
-            "event VerificationRequested(address indexed user)"
-          ),
-          fromBlock: 21831819n,
+          abi: PROOF_DONATE_ABI,
+          functionName: "getPendingUsers",
         });
 
-        const addresses = logs.map((log) => log.args.user as `0x${string}`);
-        const unique = [
-          ...new Set(addresses.map((a) => a.toLowerCase())),
-        ].map((a) => a as `0x${string}`);
-
-        setPendingAddresses(unique);
+        setPendingAddresses(pending as `0x${string}`[]);
       } catch (error) {
-        console.error("Failed to fetch verification requests:", error);
+        console.error("Failed to fetch pending users:", error);
       } finally {
         setIsLoadingEvents(false);
       }
     }
 
     fetchRequests();
-  }, [publicClient, isOwner]);
+  }, [publicClient, isOwner, fetchVersion]);
 
   const filteredAddresses = pendingAddresses.filter((addr) =>
     addr.toLowerCase().includes(searchQuery.toLowerCase())
@@ -456,7 +459,7 @@ export default function AdminPage() {
                 </thead>
                 <tbody>
                   {filteredAddresses.map((addr, i) => (
-                    <PendingRequestRow key={addr} address={addr} index={i} />
+                    <PendingRequestRow key={addr} address={addr} index={i} onVerified={refetchPending} />
                   ))}
                 </tbody>
               </table>
@@ -470,8 +473,7 @@ export default function AdminPage() {
                 Showing {filteredAddresses.length} of {pendingCount} requests
               </span>
               <span className="text-[10px] font-mono text-white/15">
-                Block #{" "}
-                <span className="text-white/30">21831819</span> → Latest
+                On-chain data
               </span>
             </div>
           )}
@@ -486,20 +488,32 @@ export default function AdminPage() {
             <div className="w-1 h-1 rounded-full bg-[#35D07F]" />
             <span className="text-[10px] font-mono text-white/20">
               Contract:{" "}
-              <span className="text-white/30">
-                {PROOF_DONATE_ADDRESS
-                  ? truncateAddress(PROOF_DONATE_ADDRESS as `0x${string}`)
-                  : "—"}
-              </span>
+              {PROOF_DONATE_ADDRESS ? (
+                <a
+                  href={`https://celoscan.io/address/${PROOF_DONATE_ADDRESS}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/30 hover:text-[#35D07F] transition-colors underline underline-offset-2"
+                >
+                  {truncateAddress(PROOF_DONATE_ADDRESS as `0x${string}`)}
+                </a>
+              ) : "—"}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-1 h-1 rounded-full bg-[#35D07F]" />
             <span className="text-[10px] font-mono text-white/20">
               Owner:{" "}
-              <span className="text-white/30">
-                {address ? truncateAddress(address) : "—"}
-              </span>
+              {address ? (
+                <a
+                  href={`https://celoscan.io/address/${address}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-white/30 hover:text-[#35D07F] transition-colors underline underline-offset-2"
+                >
+                  {truncateAddress(address)}
+                </a>
+              ) : "—"}
             </span>
           </div>
           <div className="flex items-center gap-2">
