@@ -181,10 +181,10 @@ export default function SwapPage() {
       : null;
 
   return (
-    <div className="flex-1 bg-[#0a0a0a] text-white min-h-screen">
+    <div className="flex-1 bg-[#0A1628] text-white min-h-screen">
       {/* Background */}
       <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#35D07F]/3 rounded-full blur-[160px] animate-glow" />
+        <div className="absolute top-1/3 left-1/2 -translate-x-1/2 w-[500px] h-[500px] bg-[#34D399]/3 rounded-full blur-[160px] animate-glow" />
         <svg
           className="absolute inset-0 w-full h-full opacity-[0.02]"
           xmlns="http://www.w3.org/2000/svg"
@@ -219,7 +219,7 @@ export default function SwapPage() {
         </Link>
 
         <div className="text-center mb-10">
-          <span className="font-mono text-xs text-[#35D07F] uppercase tracking-widest mb-3 block">
+          <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">
             Swap
           </span>
           <h1 className="font-['DM_Serif_Display'] text-4xl mb-2">
@@ -231,12 +231,12 @@ export default function SwapPage() {
         </div>
 
         {/* Swap card */}
-        <div className="border border-white/8 rounded-2xl overflow-hidden bg-[#0d0d0d]">
+        <div className="border border-white/8 rounded-2xl overflow-hidden bg-[#0F1D32]">
           {/* Accent line */}
           <div
             className="h-1"
             style={{
-              background: "linear-gradient(90deg, #35D07F, #FCFF52)",
+              background: "linear-gradient(90deg, #34D399, #FBBF24)",
             }}
           />
 
@@ -298,7 +298,7 @@ export default function SwapPage() {
                           disabled={isProcessing || fromBalanceRaw === 0n}
                           className={`py-1.5 rounded-md text-[10px] font-mono transition-all ${
                             isActive
-                              ? "bg-[#35D07F]/15 border border-[#35D07F]/30 text-[#35D07F]"
+                              ? "bg-[#34D399]/15 border border-[#34D399]/30 text-[#34D399]"
                               : "bg-white/[0.03] border border-white/5 text-white/30 hover:text-white/50"
                           } disabled:opacity-40`}
                         >
@@ -314,7 +314,7 @@ export default function SwapPage() {
                   <button
                     onClick={flipDirection}
                     disabled={isProcessing}
-                    className="w-10 h-10 rounded-full bg-[#0d0d0d] border border-white/10 flex items-center justify-center text-white/40 hover:text-[#35D07F] hover:border-[#35D07F]/30 transition-all disabled:opacity-40 group"
+                    className="w-10 h-10 rounded-full bg-[#0F1D32] border border-white/10 flex items-center justify-center text-white/40 hover:text-[#34D399] hover:border-[#34D399]/30 transition-all disabled:opacity-40 group"
                   >
                     <ArrowDownUp className="h-4 w-4 group-hover:rotate-180 transition-transform duration-300" />
                   </button>
@@ -402,9 +402,9 @@ export default function SwapPage() {
 
                 {/* Success message */}
                 {step === "done" && (
-                  <div className="flex items-center gap-2 rounded-lg bg-[#35D07F]/10 border border-[#35D07F]/20 p-3">
-                    <Check className="h-4 w-4 text-[#35D07F] shrink-0" />
-                    <p className="text-xs text-[#35D07F] font-mono">
+                  <div className="flex items-center gap-2 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20 p-3">
+                    <Check className="h-4 w-4 text-[#34D399] shrink-0" />
+                    <p className="text-xs text-[#34D399] font-mono">
                       Swap successful!
                     </p>
                   </div>
@@ -421,7 +421,7 @@ export default function SwapPage() {
                     quote === 0n ||
                     step === "done"
                   }
-                  className="w-full inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-4 rounded-full hover:bg-[#2bb86e] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-4 rounded-full hover:bg-[#10B981] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {isProcessing ? (
                     <>

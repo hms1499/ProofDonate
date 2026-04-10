@@ -49,12 +49,12 @@ export function MilestoneTracker({
             {/* Icon */}
             <div className="relative z-10 shrink-0 mt-0.5">
               {milestone.isReleased ? (
-                <div className="w-[26px] h-[26px] rounded-full bg-[#35D07F]/15 flex items-center justify-center">
-                  <CheckCircle className="h-4 w-4 text-[#35D07F]" />
+                <div className="w-[26px] h-[26px] rounded-full bg-[#34D399]/15 flex items-center justify-center">
+                  <CheckCircle className="h-4 w-4 text-[#34D399]" />
                 </div>
               ) : isReleasable ? (
-                <div className="w-[26px] h-[26px] rounded-full bg-[#FCFF52]/10 border border-[#FCFF52]/30 flex items-center justify-center">
-                  <Circle className="h-3.5 w-3.5 text-[#FCFF52]" />
+                <div className="w-[26px] h-[26px] rounded-full bg-[#FBBF24]/10 border border-[#FBBF24]/30 flex items-center justify-center">
+                  <Circle className="h-3.5 w-3.5 text-[#FBBF24]" />
                 </div>
               ) : (
                 <div className="w-[26px] h-[26px] rounded-full bg-white/5 flex items-center justify-center">
@@ -79,12 +79,12 @@ export function MilestoneTracker({
                     {milestone.description}
                   </p>
                   {milestone.isReleased && (
-                    <span className="inline-block mt-1 text-[10px] font-mono text-[#35D07F] uppercase tracking-widest">
+                    <span className="inline-block mt-1 text-[10px] font-mono text-[#34D399] uppercase tracking-widest">
                       Released
                     </span>
                   )}
                   {isReleasable && (
-                    <span className="inline-block mt-1 text-[10px] font-mono text-[#FCFF52] uppercase tracking-widest">
+                    <span className="inline-block mt-1 text-[10px] font-mono text-[#FBBF24] uppercase tracking-widest">
                       Ready to release
                     </span>
                   )}
@@ -96,7 +96,7 @@ export function MilestoneTracker({
 
               {isReleasable && (
                 <button
-                  className="mt-3 inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-5 py-2 rounded-full hover:bg-[#2bb86e] transition-colors text-xs disabled:opacity-40"
+                  className="mt-3 inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-5 py-2 rounded-full hover:bg-[#10B981] transition-colors text-xs disabled:opacity-40"
                   onClick={() =>
                     releaseMilestone(campaignId, BigInt(index))
                   }

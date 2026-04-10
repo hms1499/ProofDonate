@@ -33,9 +33,9 @@ export function ConnectButton() {
           return (
             <button
               onClick={openConnectModal}
-              className="group inline-flex items-center gap-2 border border-white/15 text-white text-sm font-medium px-5 py-2 rounded-full hover:border-[#35D07F]/60 hover:bg-[#35D07F]/5 hover:text-[#35D07F] transition-all duration-200"
+              className="group inline-flex items-center gap-2 border border-white/15 text-white text-sm font-medium px-5 py-2 rounded-full hover:border-[#34D399]/60 hover:bg-[#34D399]/5 hover:text-[#34D399] transition-all duration-200"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-white/30 group-hover:bg-[#35D07F] transition-colors" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white/30 group-hover:bg-[#34D399] transition-colors" />
               Connect Wallet
             </button>
           );
@@ -68,9 +68,9 @@ export function ConnectButton() {
             {/* Account pill */}
             <button
               onClick={openAccountModal}
-              className="inline-flex items-center gap-2 border border-[#35D07F]/30 bg-[#35D07F]/8 text-white text-sm font-mono px-4 py-2 rounded-full hover:border-[#35D07F]/60 hover:bg-[#35D07F]/12 transition-all"
+              className="inline-flex items-center gap-2 border border-[#34D399]/30 bg-[#34D399]/8 text-white text-sm font-mono px-4 py-2 rounded-full hover:border-[#34D399]/60 hover:bg-[#34D399]/12 transition-all"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
               {account.displayName}
               <ChevronDown className="w-3 h-3 text-white/40" />
             </button>

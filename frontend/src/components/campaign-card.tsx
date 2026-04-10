@@ -33,20 +33,21 @@ export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardPr
       style={{ animationDelay: `${index * 0.1}s` }}
     >
       {/* Hover glow effect */}
-      <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[#35D07F]/0 to-[#35D07F]/0 group-hover:from-[#35D07F]/20 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100 blur-xl pointer-events-none" />
+      <div className="absolute -inset-px rounded-2xl bg-gradient-to-b from-[#34D399]/0 to-[#34D399]/0 group-hover:from-[#34D399]/20 group-hover:to-transparent transition-all duration-500 opacity-0 group-hover:opacity-100 blur-xl pointer-events-none" />
 
-      <div className="relative border border-white/8 rounded-2xl overflow-hidden bg-[#0d0d0d] hover:border-white/15 transition-all duration-500 h-full flex flex-col">
+      <div className="relative border border-white/8 rounded-2xl overflow-hidden bg-[#0F1D32] hover:border-white/15 transition-all duration-500 h-full flex flex-col">
         {/* Image */}
         {metadata?.image && (
           <div className="h-44 overflow-hidden relative">
-            <div className="absolute inset-0 bg-gradient-to-t from-[#0d0d0d] via-transparent to-transparent z-10 opacity-60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0F1D32] via-transparent to-transparent z-10 opacity-60" />
             <img
               src={ipfsToHttp(metadata.image)}
               alt={campaign.title}
               className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
+              style={{ objectPosition: `center ${metadata.imagePosition ?? 50}%` }}
             />
             {/* Arrow indicator on hover */}
-            <div className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-[#0a0a0a]/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+            <div className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-[#0A1628]/60 backdrop-blur-md border border-white/10 flex items-center justify-center opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
               <ArrowUpRight className="h-3.5 w-3.5 text-white/70" />
             </div>
           </div>
@@ -55,11 +56,11 @@ export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardPr
         <div className="p-5 flex flex-col flex-1">
           {/* Title & verified */}
           <div className="flex items-start justify-between gap-2 mb-1.5">
-            <h3 className="font-['DM_Serif_Display'] text-lg leading-snug line-clamp-2 group-hover:text-[#35D07F] transition-colors duration-300">
+            <h3 className="font-['DM_Serif_Display'] text-lg leading-snug line-clamp-2 group-hover:text-[#34D399] transition-colors duration-300">
               {campaign.title}
             </h3>
             {campaign.creatorVerified && (
-              <CheckCircle className="h-4 w-4 text-[#35D07F] flex-shrink-0 mt-1" />
+              <CheckCircle className="h-4 w-4 text-[#34D399] flex-shrink-0 mt-1" />
             )}
           </div>
 
@@ -80,7 +81,7 @@ export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardPr
                   className="absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ease-out"
                   style={{
                     width: `${progress}%`,
-                    background: "linear-gradient(90deg, #35D07F, #2bb86e, #FCFF52)",
+                    background: "linear-gradient(90deg, #34D399, #10B981, #FBBF24)",
                     animationDelay: `${index * 0.1 + 0.5}s`,
                   }}
                 />

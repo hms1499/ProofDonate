@@ -25,6 +25,7 @@ export interface Donation {
 
 export interface CampaignMetadata {
   image: string;
+  imagePosition?: number;
   website?: string;
   socials?: { twitter?: string; github?: string };
   documents?: string[];

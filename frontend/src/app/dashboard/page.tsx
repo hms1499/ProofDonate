@@ -31,7 +31,7 @@ function CampaignDashboardCard({
   const completedMilestones = ms.filter((m) => m.isReleased).length;
 
   return (
-    <div className="border border-white/8 rounded-xl bg-[#0d0d0d] overflow-hidden group hover:border-white/14 transition-colors">
+    <div className="border border-white/8 rounded-xl bg-[#0F1D32] overflow-hidden group hover:border-white/14 transition-colors">
       {/* Card header */}
       <div className="px-6 pt-6 pb-5 border-b border-white/6">
         <div className="flex items-start justify-between gap-4 mb-4">
@@ -43,7 +43,7 @@ function CampaignDashboardCard({
           </div>
           <Link
             href={`/campaign/${campaignId}`}
-            className="shrink-0 inline-flex items-center gap-1.5 border border-white/10 text-white/50 text-xs font-mono px-3 py-1.5 rounded-full hover:border-[#35D07F]/40 hover:text-[#35D07F] transition-all"
+            className="shrink-0 inline-flex items-center gap-1.5 border border-white/10 text-white/50 text-xs font-mono px-3 py-1.5 rounded-full hover:border-[#34D399]/40 hover:text-[#34D399] transition-all"
           >
             View <ArrowRight className="w-3 h-3" />
           </Link>
@@ -57,7 +57,7 @@ function CampaignDashboardCard({
           </div>
           <div className="h-1 bg-white/6 rounded-full overflow-hidden">
             <div
-              className="h-full bg-[#35D07F] rounded-full transition-all duration-700"
+              className="h-full bg-[#34D399] rounded-full transition-all duration-700"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -89,7 +89,7 @@ export default function DashboardPage() {
   // ── Gate: not connected ──
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center px-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-6">
             <LayoutDashboard className="w-6 h-6 text-white/30" />
@@ -104,18 +104,18 @@ export default function DashboardPage() {
   const ids = (campaignIds as bigint[]) || [];
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0A1628] text-white">
       <div className="mx-auto max-w-4xl px-6 py-12 lg:py-16">
 
         {/* Header */}
         <div className="flex items-end justify-between mb-10">
           <div>
-            <span className="font-mono text-xs text-[#35D07F] uppercase tracking-widest mb-3 block">Creator Hub</span>
+            <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">Creator Hub</span>
             <h1 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl">My Campaigns</h1>
           </div>
           <Link
             href="/campaign/create"
-            className="inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-[#2bb86e] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-[#10B981] transition-colors"
           >
             <Plus className="w-4 h-4" /> New
           </Link>
@@ -132,14 +132,14 @@ export default function DashboardPage() {
 
         {/* Empty state */}
         {!isLoading && ids.length === 0 && (
-          <div className="border border-white/6 rounded-xl bg-[#0d0d0d] py-20 text-center">
+          <div className="border border-white/6 rounded-xl bg-[#0F1D32] py-20 text-center">
             <div className="w-12 h-12 rounded-full border border-white/8 flex items-center justify-center mx-auto mb-5">
               <Plus className="w-5 h-5 text-white/25" />
             </div>
             <p className="text-white/40 text-sm mb-6">You haven&apos;t created any campaigns yet.</p>
             <Link
               href="/campaign/create"
-              className="inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-[#2bb86e] transition-colors"
+              className="inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-[#10B981] transition-colors"
             >
               Create Your First Campaign <ArrowRight className="w-4 h-4" />
             </Link>
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                 { label: "Network", value: "Celo" },
                 { label: "Status", value: "Active" },
               ].map(({ label, value }) => (
-                <div key={label} className="border border-white/6 rounded-xl bg-[#0d0d0d] px-5 py-4">
+                <div key={label} className="border border-white/6 rounded-xl bg-[#0F1D32] px-5 py-4">
                   <p className="font-['DM_Serif_Display'] text-2xl text-white mb-0.5">{value}</p>
                   <p className="text-xs font-mono text-white/30 uppercase tracking-widest">{label}</p>
                 </div>

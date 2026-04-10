@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { parseEther } from "viem";
 import { useAccount } from "wagmi";
@@ -10,7 +10,7 @@ import {
   useCampaignCount,
 } from "@/hooks/useProofDonate";
 import { uploadImage, uploadMetadata } from "@/lib/pinata";
-import { Plus, Trash2, Loader2, ShieldAlert, ArrowRight, CheckCircle2, ImagePlus } from "lucide-react";
+import { Plus, Trash2, Loader2, ShieldAlert, ArrowRight, CheckCircle2, ImagePlus, GripVertical } from "lucide-react";
 import Link from "next/link";
 
 interface MilestoneInput {
@@ -19,7 +19,7 @@ interface MilestoneInput {
 }
 
 const inputCls =
-  "w-full bg-[#111] border border-white/10 text-white placeholder:text-white/25 text-sm px-4 py-3 rounded-lg focus:outline-none focus:border-[#35D07F]/60 focus:ring-1 focus:ring-[#35D07F]/30 transition-all";
+  "w-full bg-[#132238] border border-white/10 text-white placeholder:text-white/25 text-sm px-4 py-3 rounded-lg focus:outline-none focus:border-[#34D399]/60 focus:ring-1 focus:ring-[#34D399]/30 transition-all";
 
 export default function CreateCampaignPage() {
   const router = useRouter();
@@ -37,6 +37,10 @@ export default function CreateCampaignPage() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePosition, setImagePosition] = useState(50); // 0-100 vertical %
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartY, setDragStartY] = useState(0);
+  const [dragStartPos, setDragStartPos] = useState(50);
   const [isUploading, setIsUploading] = useState(false);
   const [website, setWebsite] = useState("");
   const [twitter, setTwitter] = useState("");
@@ -68,7 +72,30 @@ export default function CreateCampaignPage() {
     if (!file) return;
     setImageFile(file);
     setImagePreview(URL.createObjectURL(file));
+    setImagePosition(50);
   };
+
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+    setDragStartY(e.clientY);
+    setDragStartPos(imagePosition);
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+  }, [imagePosition]);
+
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isDragging || !containerRef.current) return;
+    const containerHeight = containerRef.current.offsetHeight;
+    const deltaY = e.clientY - dragStartY;
+    const deltaPct = (deltaY / containerHeight) * 100;
+    setImagePosition(Math.max(0, Math.min(100, dragStartPos - deltaPct)));
+  }, [isDragging, dragStartY, dragStartPos]);
+
+  const handlePointerUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
 
   const milestoneSum = milestones.reduce((s, m) => s + (parseFloat(m.amount) || 0), 0);
   const targetNum = parseFloat(targetAmount) || 0;
@@ -89,7 +116,7 @@ export default function CreateCampaignPage() {
     try {
       const imageCid = await uploadImage(imageFile);
 
-      const metadata: Record<string, unknown> = { image: imageCid };
+      const metadata: Record<string, unknown> = { image: imageCid, imagePosition: Math.round(imagePosition) };
       if (website.trim()) metadata.website = website.trim();
       if (twitter.trim() || github.trim()) {
         metadata.socials = {
@@ -121,7 +148,7 @@ export default function CreateCampaignPage() {
   // ── Gate: not connected ──
   if (!isConnected) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center px-6">
         <div className="text-center">
           <div className="w-14 h-14 rounded-full border border-white/10 flex items-center justify-center mx-auto mb-6">
             <ShieldAlert className="w-6 h-6 text-white/40" />
@@ -136,8 +163,8 @@ export default function CreateCampaignPage() {
   // ── Gate: checking verification ──
   if (isCheckingVerification) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-[#35D07F] animate-spin" />
+      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center">
+        <Loader2 className="w-6 h-6 text-[#34D399] animate-spin" />
       </div>
     );
   }
@@ -145,7 +172,7 @@ export default function CreateCampaignPage() {
   // ── Gate: not verified ──
   if (!isVerified) {
     return (
-      <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
+      <div className="min-h-screen bg-[#0A1628] flex items-center justify-center px-6">
         <div className="text-center max-w-sm">
           <div className="w-14 h-14 rounded-full border border-yellow-500/20 bg-yellow-500/5 flex items-center justify-center mx-auto mb-6">
             <ShieldAlert className="w-6 h-6 text-yellow-400" />
@@ -156,7 +183,7 @@ export default function CreateCampaignPage() {
           </p>
           <Link
             href="/verify"
-            className="inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-[#2bb86e] transition-colors"
+            className="inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3 rounded-full text-sm hover:bg-[#10B981] transition-colors"
           >
             Verify Now <ArrowRight className="w-4 h-4" />
           </Link>
@@ -166,12 +193,12 @@ export default function CreateCampaignPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-white">
+    <div className="min-h-screen bg-[#0A1628] text-white">
       <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16">
 
         {/* Header */}
         <div className="mb-10">
-          <span className="font-mono text-xs text-[#35D07F] uppercase tracking-widest mb-3 block">New Campaign</span>
+          <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">New Campaign</span>
           <h1 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl">Launch your campaign</h1>
         </div>
 
@@ -182,38 +209,75 @@ export default function CreateCampaignPage() {
             <div className="lg:col-span-2 space-y-6">
 
               {/* Campaign Image */}
-              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">01</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Image</h2>
                 </div>
 
-                <label className="block cursor-pointer">
-                  {imagePreview ? (
-                    <div className="relative rounded-lg overflow-hidden">
-                      <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-lg" />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-                        <p className="text-white text-sm">Click to change</p>
+                {imagePreview ? (
+                  <div className="space-y-3">
+                    <div
+                      ref={containerRef}
+                      className={`relative rounded-lg overflow-hidden h-48 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+                      onPointerDown={handlePointerDown}
+                      onPointerMove={handlePointerMove}
+                      onPointerUp={handlePointerUp}
+                      onPointerLeave={handlePointerUp}
+                    >
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover rounded-lg pointer-events-none"
+                        draggable={false}
+                        style={{ objectPosition: `center ${imagePosition}%` }}
+                      />
+                      {/* Drag hint overlay */}
+                      <div className={`absolute inset-0 flex items-center justify-center transition-opacity ${isDragging ? 'opacity-0' : 'opacity-0 hover:opacity-100'}`}>
+                        <div className="bg-black/60 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2">
+                          <GripVertical className="w-4 h-4 text-white/70" />
+                          <span className="text-white/70 text-xs font-mono">Drag to reposition</span>
+                        </div>
                       </div>
+                      {/* Position indicator */}
+                      {isDragging && (
+                        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1">
+                          <span className="text-white/70 text-[10px] font-mono">{Math.round(imagePosition)}%</span>
+                        </div>
+                      )}
                     </div>
-                  ) : (
-                    <div className="border-2 border-dashed border-white/10 rounded-lg h-48 flex flex-col items-center justify-center hover:border-[#35D07F]/40 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[10px] text-white/25 font-mono">Drag image to adjust visible area</p>
+                      <label className="text-[10px] text-[#34D399]/70 font-mono cursor-pointer hover:text-[#34D399] transition-colors">
+                        Change image
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          onChange={handleImageSelect}
+                          className="hidden"
+                        />
+                      </label>
+                    </div>
+                  </div>
+                ) : (
+                  <label className="block cursor-pointer">
+                    <div className="border-2 border-dashed border-white/10 rounded-lg h-48 flex flex-col items-center justify-center hover:border-[#34D399]/40 transition-colors">
                       <ImagePlus className="w-8 h-8 text-white/20 mb-2" />
                       <p className="text-sm text-white/30">Click to upload campaign image</p>
                       <p className="text-xs text-white/15 mt-1">PNG, JPG, WebP (max 5MB)</p>
                     </div>
-                  )}
-                  <input
-                    type="file"
-                    accept="image/png,image/jpeg,image/webp"
-                    onChange={handleImageSelect}
-                    className="hidden"
-                  />
-                </label>
+                    <input
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={handleImageSelect}
+                      className="hidden"
+                    />
+                  </label>
+                )}
               </div>
 
               {/* Campaign Details */}
-              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">02</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Details</h2>
@@ -266,7 +330,7 @@ export default function CreateCampaignPage() {
               </div>
 
               {/* Milestones */}
-              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-xs text-white/30 uppercase tracking-widest">03</span>
@@ -276,7 +340,7 @@ export default function CreateCampaignPage() {
                     type="button"
                     onClick={addMilestone}
                     disabled={milestones.length >= 10}
-                    className="inline-flex items-center gap-1.5 border border-white/10 text-white/60 text-xs font-mono px-3 py-1.5 rounded-full hover:border-[#35D07F]/40 hover:text-[#35D07F] disabled:opacity-30 transition-all"
+                    className="inline-flex items-center gap-1.5 border border-white/10 text-white/60 text-xs font-mono px-3 py-1.5 rounded-full hover:border-[#34D399]/40 hover:text-[#34D399] disabled:opacity-30 transition-all"
                   >
                     <Plus className="w-3 h-3" /> Add
                   </button>
@@ -332,7 +396,7 @@ export default function CreateCampaignPage() {
               </div>
 
               {/* Optional Info */}
-              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">04</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Additional Info</h2>
@@ -379,7 +443,7 @@ export default function CreateCampaignPage() {
 
             {/* ── Right: Summary sidebar ── */}
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="border border-white/8 rounded-xl bg-[#0d0d0d] p-6">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6">
                 <h3 className="text-xs font-mono text-white/30 uppercase tracking-widest mb-5">Summary</h3>
 
                 <div className="space-y-4">
@@ -407,7 +471,7 @@ export default function CreateCampaignPage() {
                       {milestones.map((m, i) => (
                         <div key={i} className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${m.description && m.amount ? 'bg-[#35D07F]' : 'bg-white/15'}`} />
+                            <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${m.description && m.amount ? 'bg-[#34D399]' : 'bg-white/15'}`} />
                             <span className="text-xs text-white/50 truncate">{m.description || `Milestone ${i + 1}`}</span>
                           </div>
                           <span className="text-xs font-mono text-white/40 shrink-0">{m.amount || '0'}</span>
@@ -421,7 +485,7 @@ export default function CreateCampaignPage() {
                       <div className="h-px bg-white/6" />
                       <div className="flex items-center justify-between">
                         <span className="text-xs text-white/30">Milestone total</span>
-                        <span className={`text-xs font-mono ${milestoneMismatch ? 'text-red-400' : 'text-[#35D07F]'}`}>
+                        <span className={`text-xs font-mono ${milestoneMismatch ? 'text-red-400' : 'text-[#34D399]'}`}>
                           {milestoneSum.toFixed(2)} / {targetNum.toFixed(2)}
                         </span>
                       </div>
@@ -434,7 +498,7 @@ export default function CreateCampaignPage() {
               <button
                 type="submit"
                 disabled={!isFormValid || isPending || isConfirming || isUploading}
-                className="w-full inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-4 rounded-xl text-sm hover:bg-[#2bb86e] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-4 rounded-xl text-sm hover:bg-[#10B981] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
               >
                 {isPending || isConfirming ? (
                   <><Loader2 className="w-4 h-4 animate-spin" /> Creating on-chain…</>

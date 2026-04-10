@@ -9,20 +9,20 @@ export default function Home() {
   const { isConnected } = useAccount();
 
   return (
-    <div className="flex-1 bg-[#0a0a0a] text-white min-h-screen">
+    <div className="flex-1 bg-[#0A1628] text-white min-h-screen">
 
       {/* ── TICKER TAPE ── */}
-      <div className="border-y border-white/8 overflow-hidden py-2.5 bg-[#0f0f0f]">
+      <div className="border-y border-white/8 overflow-hidden py-2.5 bg-[#111F35]">
         <div className="flex animate-ticker whitespace-nowrap">
           {Array(2).fill(null).map((_, i) => (
             <span key={i} className="flex items-center gap-8 px-4 font-mono text-xs text-white/30 tracking-widest uppercase">
-              <span>Proof of Donation</span><span className="text-[#35D07F]">●</span>
-              <span>Milestone Release</span><span className="text-[#35D07F]">●</span>
-              <span>Verified Creators</span><span className="text-[#35D07F]">●</span>
-              <span>On-Chain Transparency</span><span className="text-[#35D07F]">●</span>
-              <span>Celo Network</span><span className="text-[#35D07F]">●</span>
-              <span>Zero Trust Required</span><span className="text-[#35D07F]">●</span>
-              <span>Community Governed</span><span className="text-[#35D07F]">●</span>
+              <span>Proof of Donation</span><span className="text-[#34D399]">●</span>
+              <span>Milestone Release</span><span className="text-[#34D399]">●</span>
+              <span>Verified Creators</span><span className="text-[#34D399]">●</span>
+              <span>On-Chain Transparency</span><span className="text-[#34D399]">●</span>
+              <span>Celo Network</span><span className="text-[#34D399]">●</span>
+              <span>Zero Trust Required</span><span className="text-[#34D399]">●</span>
+              <span>Community Governed</span><span className="text-[#34D399]">●</span>
             </span>
           ))}
         </div>
@@ -32,8 +32,8 @@ export default function Home() {
       <section className="relative overflow-hidden">
         {/* Background glow */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#35D07F]/5 rounded-full blur-[120px] animate-glow" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#FCFF52]/3 rounded-full blur-[100px] animate-glow delay-300" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#34D399]/5 rounded-full blur-[120px] animate-glow" />
+          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#FBBF24]/3 rounded-full blur-[100px] animate-glow delay-300" />
           {/* grid lines */}
           <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
             <defs>
@@ -49,8 +49,8 @@ export default function Home() {
 
           {/* Label */}
           <div className="animate-fade-up flex items-center gap-3 mb-8">
-            <span className="inline-flex items-center gap-2 border border-[#35D07F]/30 bg-[#35D07F]/5 rounded-full px-4 py-1.5 text-xs font-mono text-[#35D07F] tracking-widest uppercase">
-              <span className="w-1.5 h-1.5 bg-[#35D07F] rounded-full animate-pulse" />
+            <span className="inline-flex items-center gap-2 border border-[#34D399]/30 bg-[#34D399]/5 rounded-full px-4 py-1.5 text-xs font-mono text-[#34D399] tracking-widest uppercase">
+              <span className="w-1.5 h-1.5 bg-[#34D399] rounded-full animate-pulse" />
               Live on Celo Network
             </span>
           </div>
@@ -62,7 +62,7 @@ export default function Home() {
               style={{ fontSize: 'clamp(3rem, 8vw, 7rem)' }}
             >
               Donations that{" "}
-              <span className="italic text-[#35D07F]">prove</span>
+              <span className="italic text-[#34D399]">prove</span>
               <br />
               every promise kept.
             </h1>
@@ -78,7 +78,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               <Link
                 href="#campaigns"
-                className="group inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#2bb86e] transition-colors text-sm"
+                className="group inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm"
               >
                 Browse Campaigns
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -111,12 +111,12 @@ export default function Home() {
       </section>
 
       {/* ── HOW IT WORKS ── */}
-      <section className="border-t border-white/8 bg-[#0d0d0d]">
+      <section className="border-t border-white/8 bg-[#0F1D32]">
         <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-28">
 
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
             <h2 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl leading-tight max-w-sm">
-              Trust through<br /><span className="italic text-[#35D07F]">transparency.</span>
+              Trust through<br /><span className="italic text-[#34D399]">transparency.</span>
             </h2>
             <p className="text-white/40 max-w-xs text-sm leading-relaxed">
               Three pillars that make every donation accountable from start to finish.
@@ -146,13 +146,13 @@ export default function Home() {
             ].map(({ icon, num, title, desc }) => (
               <div
                 key={num}
-                className="group bg-[#0d0d0d] p-8 lg:p-10 hover:bg-[#131313] transition-colors relative overflow-hidden"
+                className="group bg-[#0F1D32] p-8 lg:p-10 hover:bg-[#162641] transition-colors relative overflow-hidden"
               >
                 {/* Hover accent line */}
-                <div className="absolute top-0 left-0 right-0 h-px bg-[#35D07F] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
+                <div className="absolute top-0 left-0 right-0 h-px bg-[#34D399] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
 
                 <div className="flex items-start justify-between mb-8">
-                  <div className="p-2.5 border border-white/10 rounded-lg text-[#35D07F] bg-[#35D07F]/5">
+                  <div className="p-2.5 border border-white/10 rounded-lg text-[#34D399] bg-[#34D399]/5">
                     {icon}
                   </div>
                   <span className="font-mono text-xs text-white/20 tracking-widest">{num}</span>
@@ -171,7 +171,7 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-28">
           <div className="flex items-end justify-between mb-12">
             <div>
-              <span className="font-mono text-xs text-[#35D07F] uppercase tracking-widest mb-3 block">Live Now</span>
+              <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">Live Now</span>
               <h2 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl">Active Campaigns</h2>
             </div>
             {isConnected && (
@@ -188,7 +188,7 @@ export default function Home() {
       </section>
 
       {/* ── FOOTER CTA ── */}
-      <section className="border-t border-white/8 bg-[#0d0d0d]">
+      <section className="border-t border-white/8 bg-[#0F1D32]">
         <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-24 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div>
             <h2 className="font-['DM_Serif_Display'] text-3xl lg:text-4xl mb-2">
@@ -199,7 +199,7 @@ export default function Home() {
           <div className="flex gap-3">
             <Link
               href="#campaigns"
-              className="group inline-flex items-center gap-2 bg-[#35D07F] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#2bb86e] transition-colors text-sm"
+              className="group inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm"
             >
               Donate Now
               <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />

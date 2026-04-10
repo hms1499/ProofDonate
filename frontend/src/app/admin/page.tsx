@@ -96,9 +96,9 @@ function PendingRequestRow({
       {/* Status */}
       <td className="px-5 py-4">
         {status === "approved" ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#35D07F]/10 border border-[#35D07F]/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#35D07F] animate-pulse" />
-            <span className="text-[10px] font-mono uppercase tracking-wider text-[#35D07F]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#34D399]/10 border border-[#34D399]/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#34D399] animate-pulse" />
+            <span className="text-[10px] font-mono uppercase tracking-wider text-[#34D399]">
               Verified
             </span>
           </span>
@@ -123,8 +123,8 @@ function PendingRequestRow({
             onClick={() => verifyHuman(userAddress)}
             disabled={isPending || isConfirming}
             className="relative inline-flex items-center gap-1.5 px-4 py-2 text-xs font-mono uppercase tracking-wider
-              bg-[#35D07F]/10 text-[#35D07F] border border-[#35D07F]/30
-              hover:bg-[#35D07F]/20 hover:border-[#35D07F]/50 hover:shadow-[0_0_20px_rgba(53,208,127,0.15)]
+              bg-[#34D399]/10 text-[#34D399] border border-[#34D399]/30
+              hover:bg-[#34D399]/20 hover:border-[#34D399]/50 hover:shadow-[0_0_20px_rgba(53,208,127,0.15)]
               disabled:opacity-40 disabled:cursor-not-allowed
               rounded-md transition-all duration-300"
           >
@@ -249,14 +249,14 @@ export default function AdminPage() {
 
   if (!isConnected) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-[80vh] flex items-center justify-center bg-[#0A1628]">
         <div className="animate-fade-up text-center max-w-md px-6">
           <div className="relative mx-auto w-20 h-20 mb-8">
             <div className="absolute inset-0 rounded-2xl bg-white/[0.04] border border-white/[0.08]" />
             <div className="absolute inset-0 flex items-center justify-center">
               <Shield className="h-8 w-8 text-white/20" />
             </div>
-            <div className="absolute -inset-1 rounded-2xl bg-[#35D07F]/5 blur-xl" />
+            <div className="absolute -inset-1 rounded-2xl bg-[#34D399]/5 blur-xl" />
           </div>
           <h1 className="font-serif text-2xl text-white mb-3">
             Admin Access Required
@@ -273,12 +273,12 @@ export default function AdminPage() {
 
   if (isLoadingOwner) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-[80vh] flex items-center justify-center bg-[#0A1628]">
         <div className="animate-fade-up text-center">
           <div className="relative w-12 h-12 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border border-[#35D07F]/20 animate-ping" />
-            <div className="absolute inset-0 rounded-full border border-[#35D07F]/40 flex items-center justify-center">
-              <Loader2 className="h-5 w-5 text-[#35D07F] animate-spin" />
+            <div className="absolute inset-0 rounded-full border border-[#34D399]/20 animate-ping" />
+            <div className="absolute inset-0 rounded-full border border-[#34D399]/40 flex items-center justify-center">
+              <Loader2 className="h-5 w-5 text-[#34D399] animate-spin" />
             </div>
           </div>
           <p className="text-xs font-mono uppercase tracking-[0.3em] text-white/30">
@@ -293,7 +293,7 @@ export default function AdminPage() {
 
   if (!isOwner) {
     return (
-      <div className="min-h-[80vh] flex items-center justify-center bg-[#0a0a0a]">
+      <div className="min-h-[80vh] flex items-center justify-center bg-[#0A1628]">
         <div className="animate-fade-up text-center max-w-md px-6">
           <div className="relative mx-auto w-20 h-20 mb-8">
             <div className="absolute inset-0 rounded-2xl bg-red-500/[0.06] border border-red-500/20" />
@@ -321,7 +321,7 @@ export default function AdminPage() {
   const pendingCount = pendingAddresses.length;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] relative">
+    <div className="min-h-screen bg-[#0A1628] relative">
       {/* Background grid texture */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.03]"
@@ -332,14 +332,14 @@ export default function AdminPage() {
       />
 
       {/* Top gradient line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#35D07F]/30 to-transparent" />
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#34D399]/30 to-transparent" />
 
       <div className="relative mx-auto max-w-6xl px-6 py-10">
         {/* ── Header ──────────────────────────────────────────── */}
         <div className="animate-fade-up mb-10">
           <div className="flex items-center gap-2 mb-2">
-            <Terminal className="h-3.5 w-3.5 text-[#35D07F]/60" />
-            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#35D07F]/60">
+            <Terminal className="h-3.5 w-3.5 text-[#34D399]/60" />
+            <span className="text-[10px] font-mono uppercase tracking-[0.3em] text-[#34D399]/60">
               Command Center
             </span>
           </div>
@@ -358,7 +358,7 @@ export default function AdminPage() {
             label="Total Requests"
             value={pendingCount}
             icon={Users}
-            accent="#35D07F"
+            accent="#34D399"
             delay="0.1s"
           />
           <StatCard
@@ -372,7 +372,7 @@ export default function AdminPage() {
             label="System Status"
             value="Live"
             icon={Activity}
-            accent="#35D07F"
+            accent="#34D399"
             delay="0.3s"
           />
         </div>
@@ -385,7 +385,7 @@ export default function AdminPage() {
           {/* Table Header Bar */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-5 py-4 border-b border-white/[0.06]">
             <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-[#35D07F] animate-pulse" />
+              <div className="w-2 h-2 rounded-full bg-[#34D399] animate-pulse" />
               <h2 className="text-sm font-mono uppercase tracking-wider text-white/60">
                 Verification Queue
               </h2>
@@ -405,7 +405,7 @@ export default function AdminPage() {
                 className="w-full sm:w-64 pl-9 pr-4 py-2 text-xs font-mono
                   bg-white/[0.03] border border-white/[0.08] rounded-lg
                   text-white/70 placeholder:text-white/20
-                  focus:outline-none focus:border-[#35D07F]/30 focus:ring-1 focus:ring-[#35D07F]/10
+                  focus:outline-none focus:border-[#34D399]/30 focus:ring-1 focus:ring-[#34D399]/10
                   transition-all duration-300"
               />
             </div>
@@ -415,9 +415,9 @@ export default function AdminPage() {
           {isLoadingEvents ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="relative w-10 h-10 mb-4">
-                <div className="absolute inset-0 rounded-full border border-[#35D07F]/20 animate-ping" />
-                <div className="absolute inset-0 rounded-full border border-[#35D07F]/40 flex items-center justify-center">
-                  <Loader2 className="h-4 w-4 text-[#35D07F] animate-spin" />
+                <div className="absolute inset-0 rounded-full border border-[#34D399]/20 animate-ping" />
+                <div className="absolute inset-0 rounded-full border border-[#34D399]/40 flex items-center justify-center">
+                  <Loader2 className="h-4 w-4 text-[#34D399] animate-spin" />
                 </div>
               </div>
               <p className="text-xs font-mono uppercase tracking-[0.2em] text-white/20">
@@ -485,7 +485,7 @@ export default function AdminPage() {
           style={{ animationDelay: "0.5s" }}
         >
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-[#35D07F]" />
+            <div className="w-1 h-1 rounded-full bg-[#34D399]" />
             <span className="text-[10px] font-mono text-white/20">
               Contract:{" "}
               {PROOF_DONATE_ADDRESS ? (
@@ -493,7 +493,7 @@ export default function AdminPage() {
                   href={`https://celoscan.io/address/${PROOF_DONATE_ADDRESS}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/30 hover:text-[#35D07F] transition-colors underline underline-offset-2"
+                  className="text-white/30 hover:text-[#34D399] transition-colors underline underline-offset-2"
                 >
                   {truncateAddress(PROOF_DONATE_ADDRESS as `0x${string}`)}
                 </a>
@@ -501,7 +501,7 @@ export default function AdminPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-[#35D07F]" />
+            <div className="w-1 h-1 rounded-full bg-[#34D399]" />
             <span className="text-[10px] font-mono text-white/20">
               Owner:{" "}
               {address ? (
@@ -509,7 +509,7 @@ export default function AdminPage() {
                   href={`https://celoscan.io/address/${address}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-white/30 hover:text-[#35D07F] transition-colors underline underline-offset-2"
+                  className="text-white/30 hover:text-[#34D399] transition-colors underline underline-offset-2"
                 >
                   {truncateAddress(address)}
                 </a>
@@ -517,7 +517,7 @@ export default function AdminPage() {
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-1 h-1 rounded-full bg-[#35D07F]" />
+            <div className="w-1 h-1 rounded-full bg-[#34D399]" />
             <span className="text-[10px] font-mono text-white/20">
               Network:{" "}
               <span className="text-white/30">Celo</span>

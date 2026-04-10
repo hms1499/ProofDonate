@@ -34,13 +34,13 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-[#0a0a0a]/90 backdrop-blur-md">
+      <header className="sticky top-0 z-50 w-full border-b border-white/8 bg-[#0A1628]/90 backdrop-blur-md">
         <div className="mx-auto max-w-7xl px-6 flex h-14 items-center justify-between">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-px group">
             <span
-              className="font-['DM_Serif_Display'] italic text-[#35D07F] text-lg leading-none"
+              className="font-['DM_Serif_Display'] italic text-[#34D399] text-lg leading-none"
               style={{ fontStyle: 'italic' }}
             >
               Proof
@@ -64,7 +64,7 @@ export function Navbar() {
                 >
                   {link.name}
                   {active && (
-                    <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-[#35D07F]" />
+                    <span className="absolute -bottom-0.5 left-0 right-0 h-px bg-[#34D399]" />
                   )}
                 </Link>
               );
@@ -97,10 +97,10 @@ export function Navbar() {
           />
 
           {/* Panel */}
-          <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0d0d0d] border-l border-white/8 flex flex-col">
+          <div className="absolute right-0 top-0 bottom-0 w-72 bg-[#0F1D32] border-l border-white/8 flex flex-col">
             <div className="flex items-center justify-between px-6 h-14 border-b border-white/8">
               <span className="font-['DM_Serif_Display'] text-white text-base">
-                <span className="italic text-[#35D07F]">Proof</span>Donate
+                <span className="italic text-[#34D399]">Proof</span>Donate
               </span>
               <button
                 onClick={() => setMobileOpen(false)}
@@ -122,7 +122,7 @@ export function Navbar() {
                       active ? "text-white" : "text-white/40 hover:text-white/75"
                     }`}
                   >
-                    {active && <span className="w-1 h-1 rounded-full bg-[#35D07F]" />}
+                    {active && <span className="w-1 h-1 rounded-full bg-[#34D399]" />}
                     {!active && <span className="w-1 h-1" />}
                     {link.name}
                   </Link>

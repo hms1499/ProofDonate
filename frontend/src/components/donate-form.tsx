@@ -153,7 +153,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             disabled={isProcessing}
             className={`py-2.5 rounded-lg text-xs font-mono transition-all flex items-center justify-center gap-2 ${
               token === t
-                ? "bg-[#35D07F]/15 border border-[#35D07F]/40 text-[#35D07F]"
+                ? "bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399]"
                 : "bg-white/5 border border-white/8 text-white/50 hover:border-white/15"
             } disabled:opacity-40`}
           >
@@ -185,7 +185,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             disabled={isProcessing}
             className={`py-2 rounded-lg text-xs font-mono transition-all ${
               amount === qa
-                ? "bg-[#35D07F]/15 border border-[#35D07F]/40 text-[#35D07F]"
+                ? "bg-[#34D399]/15 border border-[#34D399]/40 text-[#34D399]"
                 : "bg-white/5 border border-white/8 text-white/50 hover:border-white/15 hover:text-white/70"
             } disabled:opacity-40`}
           >
@@ -210,7 +210,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             if (token === "cUSD") setStep(1);
           }}
           disabled={isProcessing}
-          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#35D07F]/50 focus:ring-1 focus:ring-[#35D07F]/20 disabled:opacity-50 font-mono transition-colors"
+          className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/20 disabled:opacity-50 font-mono transition-colors"
         />
         {token === "CELO" && (
           <p className="text-[10px] text-white/20 mt-1.5 font-mono">
@@ -229,7 +229,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             </span>
           </div>
           <div className="flex items-center justify-center">
-            <ArrowRight className="h-3 w-3 text-[#35D07F]/50" />
+            <ArrowRight className="h-3 w-3 text-[#34D399]/50" />
           </div>
           <div className="flex items-center justify-between text-xs">
             <span className="text-white/30 font-mono">You donate</span>
@@ -255,9 +255,9 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
               <div
                 className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-mono ${
                   step > s
-                    ? "bg-[#35D07F]/20 text-[#35D07F]"
+                    ? "bg-[#34D399]/20 text-[#34D399]"
                     : step === s
-                      ? "bg-[#35D07F] text-black"
+                      ? "bg-[#34D399] text-black"
                       : "bg-white/5 text-white/25"
                 }`}
               >
@@ -266,7 +266,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
               {s < 3 && (
                 <div
                   className={`flex-1 h-px mx-1 ${
-                    step > s ? "bg-[#35D07F]/30" : "bg-white/8"
+                    step > s ? "bg-[#34D399]/30" : "bg-white/8"
                   }`}
                 />
               )}
@@ -290,7 +290,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
           disabled={
             isProcessing || !hasValidAmount || !!insufficientBalance
           }
-          className="w-full group inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#2bb86e] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full group inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isDonating || isDonateConfirming ? (
             <>
@@ -313,7 +313,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             !!insufficientBalance ||
             (step === 2 && celoQuote === 0n)
           }
-          className="w-full group inline-flex items-center justify-center gap-2 bg-[#35D07F] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#2bb86e] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full group inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
         >
           {isProcessing ? (
             <>
@@ -342,8 +342,8 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
 
       {/* Success message */}
       {isDonateSuccess && (
-        <div className="text-center py-2 px-3 rounded-lg bg-[#35D07F]/10 border border-[#35D07F]/20">
-          <p className="text-sm text-[#35D07F] font-medium">
+        <div className="text-center py-2 px-3 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20">
+          <p className="text-sm text-[#34D399] font-medium">
             Donation successful! Thank you.
           </p>
         </div>

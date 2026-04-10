@@ -11,6 +11,7 @@ export async function uploadImage(file: File): Promise<string> {
 
 export async function uploadMetadata(metadata: {
   image: string;
+  imagePosition?: number;
   website?: string;
   socials?: { twitter?: string; github?: string };
   documents?: string[];
