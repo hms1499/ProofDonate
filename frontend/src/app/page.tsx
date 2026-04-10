@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { CampaignList } from "@/components/campaign-list";
+import { NetworkCanvas } from "@/components/network-canvas";
 import { useAccount } from "wagmi";
 import { ArrowRight, Eye, Shield, Layers } from "lucide-react";
 
@@ -30,19 +31,13 @@ export default function Home() {
 
       {/* ── HERO ── */}
       <section className="relative overflow-hidden">
-        {/* Background glow */}
+        {/* Network constellation background */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#34D399]/5 rounded-full blur-[120px] animate-glow" />
           <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-[#FBBF24]/3 rounded-full blur-[100px] animate-glow delay-300" />
-          {/* grid lines */}
-          <svg className="absolute inset-0 w-full h-full opacity-[0.03]" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="white" strokeWidth="0.5"/>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#grid)" />
-          </svg>
+        </div>
+        <div className="absolute inset-0">
+          <NetworkCanvas />
         </div>
 
         <div className="relative container mx-auto max-w-7xl px-6 pt-20 pb-24 lg:pt-28 lg:pb-32">
