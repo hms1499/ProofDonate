@@ -18,8 +18,8 @@ function CampaignDashboardCard({
   campaignId: bigint;
   address: `0x${string}`;
 }) {
-  const { data: campaign } = useCampaign(campaignId);
-  const { data: milestones } = useMilestones(campaignId);
+  const { data: campaign, refetch: refetchCampaign } = useCampaign(campaignId);
+  const { data: milestones, refetch: refetchMilestones } = useMilestones(campaignId);
 
   if (!campaign) return null;
 
@@ -76,6 +76,10 @@ function CampaignDashboardCard({
           campaignId={campaignId}
           isCreator={true}
           currentAmount={c.currentAmount}
+          onChange={() => {
+            refetchCampaign();
+            refetchMilestones();
+          }}
         />
       </div>
     </div>
