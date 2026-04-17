@@ -165,7 +165,7 @@ function MilestoneRow({
             )}
           </div>
           <span className="text-xs text-white/30 font-mono whitespace-nowrap mt-0.5">
-            {Number(formatEther(milestone.amount)).toFixed(2)} CELO
+            {Number(formatEther(milestone.amount)).toFixed(2)} cUSD
           </span>
         </div>
 

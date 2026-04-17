@@ -8,6 +8,7 @@ import {
   useAccount,
 } from "wagmi";
 import { PROOF_DONATE_ABI, PROOF_DONATE_ADDRESS } from "@/lib/contracts";
+import { feeCurrencyConfig } from "@/lib/minipay-transactions";
 import type { Campaign, Milestone, Donation } from "@/types";
 
 const contractConfig = {
@@ -97,8 +98,8 @@ export function useDonate() {
     writeContract({
       ...contractConfig,
       functionName: "donate",
-      args: [campaignId],
-      value: amount,
+      args: [campaignId, amount],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -131,6 +132,7 @@ export function useCreateCampaign() {
         milestoneAmounts,
         deadline,
       ],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -147,6 +149,7 @@ export function useReleaseMilestone() {
       ...contractConfig,
       functionName: "releaseMilestone",
       args: [campaignId, milestoneIndex],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -163,6 +166,7 @@ export function useCancelCampaign() {
       ...contractConfig,
       functionName: "cancelCampaign",
       args: [campaignId],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -178,6 +182,7 @@ export function useRequestVerification() {
     writeContract({
       ...contractConfig,
       functionName: "requestVerification",
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -212,6 +217,7 @@ export function useRequestMilestoneRelease() {
       ...contractConfig,
       functionName: "requestMilestoneRelease",
       args: [campaignId, milestoneIndex],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -236,6 +242,7 @@ export function useClaimRefund() {
       ...contractConfig,
       functionName: "claimRefund",
       args: [campaignId],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -277,6 +284,7 @@ export function useVerifyHuman() {
       ...contractConfig,
       functionName: "verifyHuman",
       args: [userAddress],
+      ...feeCurrencyConfig(),
     });
   };
 
@@ -293,6 +301,7 @@ export function useUpdateMetadataURI() {
       ...contractConfig,
       functionName: "updateMetadataURI",
       args: [campaignId, metadataURI],
+      ...feeCurrencyConfig(),
     });
   };
 

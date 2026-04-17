@@ -12,7 +12,6 @@ import { useContractOwner } from "@/hooks/useProofDonate";
 const baseNavLinks = [
   { name: "Home", href: "/" },
   { name: "Create", href: "/campaign/create" },
-  { name: "Swap", href: "/swap" },
   { name: "Dashboard", href: "/dashboard" },
   { name: "Verify", href: "/verify" },
 ];

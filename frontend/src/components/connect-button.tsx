@@ -3,13 +3,13 @@
 import { ConnectButton as RainbowKitConnectButton } from "@rainbow-me/rainbowkit";
 import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { isMiniPay } from "@/lib/minipay";
 
 export function ConnectButton() {
   const [isMinipay, setIsMinipay] = useState(false);
 
   useEffect(() => {
-    // @ts-ignore
-    if (window.ethereum?.isMiniPay) setIsMinipay(true);
+    if (isMiniPay()) setIsMinipay(true);
   }, []);
 
   if (isMinipay) return null;

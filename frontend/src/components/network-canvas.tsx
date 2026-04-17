@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
 import type { ISourceOptions } from "@tsparticles/engine";
+import { isMiniPay } from "@/lib/minipay";
 
 export function NetworkCanvas() {
   const [ready, setReady] = useState(false);
@@ -101,7 +102,7 @@ export function NetworkCanvas() {
     []
   );
 
-  if (!ready) return null;
+  if (!ready || isMiniPay()) return null;
 
   return (
     <Particles

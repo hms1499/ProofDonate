@@ -257,14 +257,14 @@ export default function CampaignDetailPage() {
             {
               icon: <TrendingUp className="h-4 w-4" />,
               value: raised.toFixed(2),
-              unit: "CELO",
+              unit: "cUSD",
               label: "Raised",
               highlight: true,
             },
             {
               icon: <Target className="h-4 w-4" />,
               value: target.toFixed(0),
-              unit: "CELO",
+              unit: "cUSD",
               label: "Goal",
               highlight: false,
             },
@@ -335,7 +335,7 @@ export default function CampaignDetailPage() {
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="font-['DM_Serif_Display'] text-4xl text-white">{raised.toFixed(2)}</span>
-                    <span className="text-sm font-mono text-white/30">CELO raised</span>
+                    <span className="text-sm font-mono text-white/30">cUSD raised</span>
                   </div>
                 </div>
                 <div className="text-right">
@@ -349,7 +349,7 @@ export default function CampaignDetailPage() {
                   >
                     {progress.toFixed(0)}%
                   </span>
-                  <span className="text-[10px] font-mono text-white/25 block mt-1">of {target.toFixed(0)} CELO</span>
+                  <span className="text-[10px] font-mono text-white/25 block mt-1">of {target.toFixed(0)} cUSD</span>
                 </div>
               </div>
 
@@ -381,8 +381,8 @@ export default function CampaignDetailPage() {
               </div>
 
               <div className="flex items-center justify-between text-xs font-mono text-white/25">
-                <span>0 CELO</span>
-                <span>{target.toFixed(0)} CELO</span>
+                <span>0 cUSD</span>
+                <span>{target.toFixed(0)} cUSD</span>
               </div>
             </div>
 
@@ -462,7 +462,7 @@ export default function CampaignDetailPage() {
                           <span className="text-sm font-medium text-white block">
                             {Number(formatEther(d.amount)).toFixed(2)}
                           </span>
-                          <span className="text-[10px] font-mono text-white/25">CELO</span>
+                          <span className="text-[10px] font-mono text-white/25">cUSD</span>
                         </div>
                       </div>
                     ))}

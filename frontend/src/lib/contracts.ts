@@ -1,10 +1,13 @@
 export const PROOF_DONATE_ABI = [
   {
     type: "constructor",
-    inputs: [{ name: "_feeBps", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "_donationToken", type: "address", internalType: "address" },
+      { name: "_feeBps", type: "uint256", internalType: "uint256" },
+      { name: "_minDonation", type: "uint256", internalType: "uint256" },
+    ],
     stateMutability: "nonpayable",
   },
-  { type: "receive", stateMutability: "payable" },
   {
     type: "function",
     name: "MAX_FEE_BPS",
@@ -21,13 +24,6 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
-    name: "MIN_DONATION",
-    inputs: [],
-    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "acceptOwnership",
     inputs: [],
     outputs: [],
@@ -38,6 +34,24 @@ export const PROOF_DONATE_ABI = [
     name: "campaignCount",
     inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "campaigns",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [
+      { name: "creator", type: "address", internalType: "address" },
+      { name: "title", type: "string", internalType: "string" },
+      { name: "description", type: "string", internalType: "string" },
+      { name: "targetAmount", type: "uint256", internalType: "uint256" },
+      { name: "currentAmount", type: "uint256", internalType: "uint256" },
+      { name: "deadline", type: "uint256", internalType: "uint256" },
+      { name: "isActive", type: "bool", internalType: "bool" },
+      { name: "milestoneCount", type: "uint256", internalType: "uint256" },
+      { name: "creatorVerified", type: "bool", internalType: "bool" },
+      { name: "metadataURI", type: "string", internalType: "string" },
+    ],
     stateMutability: "view",
   },
   {
@@ -72,9 +86,26 @@ export const PROOF_DONATE_ABI = [
   {
     type: "function",
     name: "donate",
-    inputs: [{ name: "_campaignId", type: "uint256", internalType: "uint256" }],
+    inputs: [
+      { name: "_campaignId", type: "uint256", internalType: "uint256" },
+      { name: "_amount", type: "uint256", internalType: "uint256" },
+    ],
     outputs: [],
-    stateMutability: "payable",
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
+    name: "donationToken",
+    inputs: [],
+    outputs: [{ name: "", type: "address", internalType: "contract IERC20" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "donationTokenDecimals",
+    inputs: [],
+    outputs: [{ name: "", type: "uint8", internalType: "uint8" }],
+    stateMutability: "view",
   },
   {
     type: "function",
@@ -94,7 +125,7 @@ export const PROOF_DONATE_ABI = [
       {
         name: "",
         type: "tuple",
-        internalType: "struct ProofDonate.Campaign",
+        internalType: "struct ProofDonateV2.Campaign",
         components: [
           { name: "creator", type: "address", internalType: "address" },
           { name: "title", type: "string", internalType: "string" },
@@ -120,13 +151,6 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
-    name: "getPendingUsers",
-    inputs: [],
-    outputs: [{ name: "", type: "address[]", internalType: "address[]" }],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
     name: "getDonationCount",
     inputs: [{ name: "_campaignId", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
@@ -140,7 +164,7 @@ export const PROOF_DONATE_ABI = [
       {
         name: "",
         type: "tuple[]",
-        internalType: "struct ProofDonate.Donation[]",
+        internalType: "struct ProofDonateV2.Donation[]",
         components: [
           { name: "donor", type: "address", internalType: "address" },
           { name: "amount", type: "uint256", internalType: "uint256" },
@@ -158,7 +182,7 @@ export const PROOF_DONATE_ABI = [
       {
         name: "",
         type: "tuple[]",
-        internalType: "struct ProofDonate.Milestone[]",
+        internalType: "struct ProofDonateV2.Milestone[]",
         components: [
           { name: "description", type: "string", internalType: "string" },
           { name: "amount", type: "uint256", internalType: "uint256" },
@@ -166,6 +190,13 @@ export const PROOF_DONATE_ABI = [
         ],
       },
     ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "getPendingUsers",
+    inputs: [],
+    outputs: [{ name: "", type: "address[]", internalType: "address[]" }],
     stateMutability: "view",
   },
   {
@@ -185,6 +216,27 @@ export const PROOF_DONATE_ABI = [
       { name: "", type: "uint256", internalType: "uint256" },
       { name: "", type: "uint256", internalType: "uint256" },
     ],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "milestones",
+    inputs: [
+      { name: "", type: "uint256", internalType: "uint256" },
+      { name: "", type: "uint256", internalType: "uint256" },
+    ],
+    outputs: [
+      { name: "description", type: "string", internalType: "string" },
+      { name: "amount", type: "uint256", internalType: "uint256" },
+      { name: "isReleased", type: "bool", internalType: "bool" },
+    ],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "minDonation",
+    inputs: [],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -220,6 +272,20 @@ export const PROOF_DONATE_ABI = [
     type: "function",
     name: "platformFeeBps",
     inputs: [],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "refundSnapshotAmount",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
+    stateMutability: "view",
+  },
+  {
+    type: "function",
+    name: "refundSnapshotTotal",
+    inputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     outputs: [{ name: "", type: "uint256", internalType: "uint256" }],
     stateMutability: "view",
   },
@@ -273,6 +339,13 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
+    name: "unpause",
+    inputs: [],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+  {
+    type: "function",
     name: "updateMetadataURI",
     inputs: [
       { name: "_campaignId", type: "uint256", internalType: "uint256" },
@@ -283,8 +356,8 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "function",
-    name: "unpause",
-    inputs: [],
+    name: "updateMinDonation",
+    inputs: [{ name: "_newMinDonation", type: "uint256", internalType: "uint256" }],
     outputs: [],
     stateMutability: "nonpayable",
   },
@@ -356,6 +429,15 @@ export const PROOF_DONATE_ABI = [
   },
   {
     type: "event",
+    name: "MetadataUpdated",
+    anonymous: false,
+    inputs: [
+      { name: "campaignId", type: "uint256", indexed: true, internalType: "uint256" },
+      { name: "metadataURI", type: "string", indexed: false, internalType: "string" },
+    ],
+  },
+  {
+    type: "event",
     name: "MilestoneReleaseRequested",
     anonymous: false,
     inputs: [
@@ -372,6 +454,14 @@ export const PROOF_DONATE_ABI = [
       { name: "campaignId", type: "uint256", indexed: true, internalType: "uint256" },
       { name: "milestoneIndex", type: "uint256", indexed: false, internalType: "uint256" },
       { name: "amount", type: "uint256", indexed: false, internalType: "uint256" },
+    ],
+  },
+  {
+    type: "event",
+    name: "MinDonationUpdated",
+    anonymous: false,
+    inputs: [
+      { name: "newMinDonation", type: "uint256", indexed: false, internalType: "uint256" },
     ],
   },
   {
@@ -434,30 +524,16 @@ export const PROOF_DONATE_ABI = [
       { name: "user", type: "address", indexed: true, internalType: "address" },
     ],
   },
-  {
-    type: "event",
-    name: "MetadataUpdated",
-    anonymous: false,
-    inputs: [
-      { name: "campaignId", type: "uint256", indexed: true, internalType: "uint256" },
-      { name: "metadataURI", type: "string", indexed: false, internalType: "string" },
-    ],
-  },
+  { type: "error", name: "AddressEmptyCode", inputs: [{ name: "target", type: "address", internalType: "address" }] },
+  { type: "error", name: "AddressInsufficientBalance", inputs: [{ name: "account", type: "address", internalType: "address" }] },
   { type: "error", name: "EnforcedPause", inputs: [] },
   { type: "error", name: "ExpectedPause", inputs: [] },
-  {
-    type: "error",
-    name: "OwnableInvalidOwner",
-    inputs: [{ name: "owner", type: "address", internalType: "address" }],
-  },
-  {
-    type: "error",
-    name: "OwnableUnauthorizedAccount",
-    inputs: [{ name: "account", type: "address", internalType: "address" }],
-  },
+  { type: "error", name: "FailedInnerCall", inputs: [] },
+  { type: "error", name: "OwnableInvalidOwner", inputs: [{ name: "owner", type: "address", internalType: "address" }] },
+  { type: "error", name: "OwnableUnauthorizedAccount", inputs: [{ name: "account", type: "address", internalType: "address" }] },
   { type: "error", name: "ReentrancyGuardReentrantCall", inputs: [] },
+  { type: "error", name: "SafeERC20FailedOperation", inputs: [{ name: "token", type: "address", internalType: "address" }] },
 ] as const;
 
-// Update these after deployment
-export const PROOF_DONATE_ADDRESS = (process.env.NEXT_PUBLIC_PROOF_DONATE_ADDRESS ||
-  "0x0000000000000000000000000000000000000000") as `0x${string}`;
+// ProofDonateV2 deployed on Celo mainnet
+export const PROOF_DONATE_ADDRESS = "0x01d425F2d51178ff79c917bF5A4BC697798bC044" as `0x${string}`;

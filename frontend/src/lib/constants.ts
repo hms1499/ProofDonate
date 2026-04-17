@@ -1,5 +1,4 @@
-export const CUSD_ADDRESS =
-  "0x765DE816845861e75A25fCA122bb6898B8B1282a" as `0x${string}`;
+export { CUSD_ADDRESS } from "./minipay";
 
 export const ERC20_ABI = [
   {

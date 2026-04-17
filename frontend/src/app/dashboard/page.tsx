@@ -53,7 +53,7 @@ function CampaignDashboardCard({
         <div className="space-y-2">
           <div className="flex items-center justify-between text-xs">
             <span className="font-['DM_Serif_Display'] text-lg text-white">{raised.toFixed(2)}</span>
-            <span className="text-white/30 font-mono">of {target.toFixed(0)} CELO</span>
+            <span className="text-white/30 font-mono">of {target.toFixed(0)} cUSD</span>
           </div>
           <div className="h-1 bg-white/6 rounded-full overflow-hidden">
             <div

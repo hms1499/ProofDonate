@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { WagmiProvider, createConfig, createStorage, http, useAccount, useConnect } from "wagmi";
 import { celo } from "wagmi/chains";
 import { ConnectButton } from "./connect-button";
+import { isMiniPay } from "@/lib/minipay";
 
 const connectors = connectorsForWallets(
   [
@@ -43,7 +44,7 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Check if the app is running inside MiniPay
-    if (window.ethereum && window.ethereum.isMiniPay) {
+    if (isMiniPay()) {
       const injectedConnector = connectors.find((c) => c.id === "injected");
       if (injectedConnector) {
         connect({ connector: injectedConnector });
@@ -51,8 +52,9 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
     }
   }, [connect, connectors]);
 
-  // Auto add & switch to Celo Mainnet
+  // Auto add & switch to Celo Mainnet (skip in MiniPay — always on Celo)
   useEffect(() => {
+    if (isMiniPay()) return;
     if (!isConnected || chainId === celo.id || !window.ethereum) return;
 
     const switchToCelo = async () => {

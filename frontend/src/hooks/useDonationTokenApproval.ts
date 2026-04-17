@@ -6,19 +6,27 @@ import {
   useWaitForTransactionReceipt,
   useAccount,
 } from "wagmi";
-import { CUSD_ADDRESS, ERC20_ABI } from "@/lib/constants";
+import { CUSD_ADDRESS } from "@/lib/minipay";
+import { ERC20_ABI } from "@/lib/constants";
+import { PROOF_DONATE_ADDRESS } from "@/lib/contracts";
+import { feeCurrencyConfig } from "@/lib/minipay-transactions";
 
-export function useCUSDApproval(
-  spender: `0x${string}`,
-  amount: bigint
-) {
+export function useDonationTokenApproval(amount: bigint) {
   const { address } = useAccount();
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
     address: CUSD_ADDRESS,
     abi: ERC20_ABI,
     functionName: "allowance",
-    args: address ? [address, spender] : undefined,
+    args: address ? [address, PROOF_DONATE_ADDRESS] : undefined,
+    query: { enabled: !!address },
+  });
+
+  const { data: balance } = useReadContract({
+    address: CUSD_ADDRESS,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
     query: { enabled: !!address },
   });
 
@@ -32,28 +40,27 @@ export function useCUSDApproval(
   const { isLoading: isWaitingApproval, isSuccess: isApproved } =
     useWaitForTransactionReceipt({
       hash,
-      query: {
-        enabled: !!hash,
-      },
+      query: { enabled: !!hash },
     });
 
-  const needsApproval = allowance !== undefined ? allowance < amount : true;
+  const needsApproval = allowance !== undefined ? (allowance as bigint) < amount : true;
 
   const approve = () => {
     writeContract({
       address: CUSD_ADDRESS,
       abi: ERC20_ABI,
       functionName: "approve",
-      args: [spender, amount],
+      args: [PROOF_DONATE_ADDRESS, amount],
+      ...feeCurrencyConfig(),
     });
   };
 
   return {
     needsApproval,
     allowance,
+    balance: balance as bigint | undefined,
     approve,
-    isApproving,
-    isWaitingApproval,
+    isApproving: isApproving || isWaitingApproval,
     isApproved,
     refetchAllowance,
     error,
