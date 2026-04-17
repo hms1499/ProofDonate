@@ -194,22 +194,22 @@ export default function CreateCampaignPage() {
 
   return (
     <div className="min-h-screen bg-[#0A1628] text-white">
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8 sm:py-12 lg:py-16">
 
         {/* Header */}
-        <div className="mb-10">
+        <div className="mb-8 sm:mb-10">
           <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">New Campaign</span>
-          <h1 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl">Launch your campaign</h1>
+          <h1 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl lg:text-5xl">Launch your campaign</h1>
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 items-start">
 
             {/* ── Left: Main form ── */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="lg:col-span-2 space-y-5 sm:space-y-6">
 
               {/* Campaign Image */}
-              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-5 sm:p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">01</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Image</h2>
@@ -277,7 +277,7 @@ export default function CreateCampaignPage() {
               </div>
 
               {/* Campaign Details */}
-              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-5 sm:p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">02</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Campaign Details</h2>
@@ -330,7 +330,7 @@ export default function CreateCampaignPage() {
               </div>
 
               {/* Milestones */}
-              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-5 sm:p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <div className="flex items-center gap-3">
                     <span className="font-mono text-xs text-white/30 uppercase tracking-widest">03</span>
@@ -354,13 +354,13 @@ export default function CreateCampaignPage() {
                   {milestones.map((m, i) => (
                     <div key={i} className="flex items-start gap-3">
                       <span className="mt-3 font-mono text-xs text-white/20 w-5 shrink-0 text-right">{String(i + 1).padStart(2, '0')}</span>
-                      <div className="flex-1 grid grid-cols-3 gap-2">
+                      <div className="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-2 min-w-0">
                         <input
                           type="text"
                           value={m.description}
                           onChange={(e) => updateMilestone(i, "description", e.target.value)}
                           placeholder={`Milestone ${i + 1} description`}
-                          className={`col-span-2 ${inputCls}`}
+                          className={`sm:col-span-2 ${inputCls}`}
                         />
                         <div className="relative">
                           <input
@@ -396,7 +396,7 @@ export default function CreateCampaignPage() {
               </div>
 
               {/* Optional Info */}
-              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6 lg:p-8 space-y-5">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-5 sm:p-6 lg:p-8 space-y-5">
                 <div className="flex items-center gap-3 mb-2">
                   <span className="font-mono text-xs text-white/30 uppercase tracking-widest">04</span>
                   <h2 className="text-sm font-medium text-white/70 uppercase tracking-wider">Additional Info</h2>
@@ -408,7 +408,7 @@ export default function CreateCampaignPage() {
                   <input type="url" value={website} onChange={(e) => setWebsite(e.target.value)} placeholder="https://your-project.com" className={inputCls} />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-mono text-white/40 uppercase tracking-widest mb-2 block">Twitter</label>
                     <input type="url" value={twitter} onChange={(e) => setTwitter(e.target.value)} placeholder="https://twitter.com/..." className={inputCls} />
@@ -443,7 +443,7 @@ export default function CreateCampaignPage() {
 
             {/* ── Right: Summary sidebar ── */}
             <div className="lg:sticky lg:top-24 space-y-4">
-              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-6">
+              <div className="border border-white/8 rounded-xl bg-[#0F1D32] p-5 sm:p-6">
                 <h3 className="text-xs font-mono text-white/30 uppercase tracking-widest mb-5">Summary</h3>
 
                 <div className="space-y-4">

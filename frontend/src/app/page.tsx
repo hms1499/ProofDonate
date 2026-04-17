@@ -40,10 +40,10 @@ export default function Home() {
           <NetworkCanvas />
         </div>
 
-        <div className="relative container mx-auto max-w-7xl px-6 pt-20 pb-24 lg:pt-28 lg:pb-32">
+        <div className="relative container mx-auto max-w-7xl px-4 sm:px-6 pt-14 pb-16 sm:pt-20 sm:pb-24 lg:pt-28 lg:pb-32">
 
           {/* Label */}
-          <div className="animate-fade-up flex items-center gap-3 mb-8">
+          <div className="animate-fade-up flex items-center gap-3 mb-6 sm:mb-8">
             <span className="inline-flex items-center gap-2 border border-[#34D399]/30 bg-[#34D399]/5 rounded-full px-4 py-1.5 text-xs font-mono text-[#34D399] tracking-widest uppercase">
               <span className="w-1.5 h-1.5 bg-[#34D399] rounded-full animate-pulse" />
               Live on Celo Network
@@ -51,10 +51,10 @@ export default function Home() {
           </div>
 
           {/* Headline */}
-          <div className="max-w-5xl mb-8">
+          <div className="max-w-5xl mb-6 sm:mb-8">
             <h1
               className="animate-fade-up delay-100 font-['DM_Serif_Display'] leading-[1.05] tracking-tight"
-              style={{ fontSize: 'clamp(3rem, 8vw, 7rem)' }}
+              style={{ fontSize: 'clamp(2rem, 8vw, 7rem)' }}
             >
               Donations that{" "}
               <span className="italic text-[#34D399]">prove</span>
@@ -64,8 +64,8 @@ export default function Home() {
           </div>
 
           {/* Subline + CTA — side by side on large screens */}
-          <div className="animate-fade-up delay-200 flex flex-col lg:flex-row lg:items-end gap-8 lg:gap-16">
-            <p className="max-w-md text-white/50 text-lg leading-relaxed font-light">
+          <div className="animate-fade-up delay-200 flex flex-col lg:flex-row lg:items-end gap-6 sm:gap-8 lg:gap-16">
+            <p className="max-w-md text-white/50 text-base sm:text-lg leading-relaxed font-light">
               Milestone-based fund release on Celo. Verified creators.
               Every transaction immutably recorded — no trust required.
             </p>
@@ -73,7 +73,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               <Link
                 href="#campaigns"
-                className="group inline-flex items-center gap-2 bg-[#34D399] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm"
+                className="group inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-7 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm"
               >
                 Browse Campaigns
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -81,7 +81,7 @@ export default function Home() {
               {isConnected && (
                 <Link
                   href="/campaign/create"
-                  className="inline-flex items-center gap-2 border border-white/15 text-white font-medium px-7 py-3.5 rounded-full hover:border-white/30 hover:bg-white/5 transition-all text-sm"
+                  className="inline-flex items-center justify-center gap-2 border border-white/15 text-white font-medium px-7 py-3.5 rounded-full hover:border-white/30 hover:bg-white/5 transition-all text-sm"
                 >
                   Create Campaign
                 </Link>
@@ -90,15 +90,15 @@ export default function Home() {
           </div>
 
           {/* Stats bar */}
-          <div className="animate-fade-up delay-400 mt-16 pt-8 border-t border-white/8 grid grid-cols-3 gap-8 max-w-2xl">
+          <div className="animate-fade-up delay-400 mt-10 sm:mt-16 pt-6 sm:pt-8 border-t border-white/8 grid grid-cols-3 gap-4 sm:gap-8 max-w-2xl">
             {[
               { n: "$0", label: "Lost to fraud" },
               { n: "100%", label: "On-chain proof" },
               { n: "∞", label: "Auditable history" },
             ].map(({ n, label }) => (
               <div key={label}>
-                <div className="font-['DM_Serif_Display'] text-3xl lg:text-4xl text-white mb-1">{n}</div>
-                <div className="text-xs font-mono text-white/35 uppercase tracking-widest">{label}</div>
+                <div className="font-['DM_Serif_Display'] text-2xl sm:text-3xl lg:text-4xl text-white mb-1">{n}</div>
+                <div className="text-[10px] sm:text-xs font-mono text-white/35 uppercase tracking-widest">{label}</div>
               </div>
             ))}
           </div>
@@ -107,10 +107,10 @@ export default function Home() {
 
       {/* ── HOW IT WORKS ── */}
       <section className="border-t border-white/8 bg-[#0F1D32]">
-        <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-28">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
 
-          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-14">
-            <h2 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl leading-tight max-w-sm">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-5 sm:gap-6 mb-10 sm:mb-14">
+            <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl lg:text-5xl leading-tight max-w-sm">
               Trust through<br /><span className="italic text-[#34D399]">transparency.</span>
             </h2>
             <p className="text-white/40 max-w-xs text-sm leading-relaxed">
@@ -141,12 +141,12 @@ export default function Home() {
             ].map(({ icon, num, title, desc }) => (
               <div
                 key={num}
-                className="group bg-[#0F1D32] p-8 lg:p-10 hover:bg-[#162641] transition-colors relative overflow-hidden"
+                className="group bg-[#0F1D32] p-6 sm:p-8 lg:p-10 hover:bg-[#162641] transition-colors relative overflow-hidden"
               >
                 {/* Hover accent line */}
                 <div className="absolute top-0 left-0 right-0 h-px bg-[#34D399] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500" />
 
-                <div className="flex items-start justify-between mb-8">
+                <div className="flex items-start justify-between mb-6 sm:mb-8">
                   <div className="p-2.5 border border-white/10 rounded-lg text-[#34D399] bg-[#34D399]/5">
                     {icon}
                   </div>
@@ -163,16 +163,16 @@ export default function Home() {
 
       {/* ── CAMPAIGNS ── */}
       <section id="campaigns" className="border-t border-white/8">
-        <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-28">
-          <div className="flex items-end justify-between mb-12">
-            <div>
-              <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-3 block">Live Now</span>
-              <h2 className="font-['DM_Serif_Display'] text-4xl lg:text-5xl">Active Campaigns</h2>
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 lg:py-28">
+          <div className="flex items-end justify-between mb-8 sm:mb-12 gap-4">
+            <div className="min-w-0">
+              <span className="font-mono text-xs text-[#34D399] uppercase tracking-widest mb-2 sm:mb-3 block">Live Now</span>
+              <h2 className="font-['DM_Serif_Display'] text-3xl sm:text-4xl lg:text-5xl">Active Campaigns</h2>
             </div>
             {isConnected && (
               <Link
                 href="/campaign/create"
-                className="hidden sm:inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors font-mono"
+                className="hidden sm:inline-flex items-center gap-2 text-sm text-white/50 hover:text-white transition-colors font-mono shrink-0"
               >
                 + Start yours
               </Link>
@@ -184,9 +184,9 @@ export default function Home() {
 
       {/* ── FOOTER CTA ── */}
       <section className="border-t border-white/8 bg-[#0F1D32]">
-        <div className="container mx-auto max-w-7xl px-6 py-20 lg:py-24 flex flex-col lg:flex-row items-center justify-between gap-8">
+        <div className="container mx-auto max-w-7xl px-4 sm:px-6 py-14 sm:py-20 lg:py-24 flex flex-col lg:flex-row items-center justify-between gap-6 sm:gap-8 text-center lg:text-left">
           <div>
-            <h2 className="font-['DM_Serif_Display'] text-3xl lg:text-4xl mb-2">
+            <h2 className="font-['DM_Serif_Display'] text-2xl sm:text-3xl lg:text-4xl mb-2">
               Ready to make impact?
             </h2>
             <p className="text-white/40 text-sm">No middlemen. No fees hidden. Just proof.</p>

@@ -72,10 +72,10 @@ export default function CampaignDetailPage() {
     return (
       <div className="flex-1 bg-[#0A1628] text-white min-h-screen">
         {/* Skeleton hero */}
-        <div className="h-[52vh] min-h-[380px] bg-white/4 animate-pulse" />
-        <div className="container max-w-6xl mx-auto px-6 -mt-10">
-          <div className="grid grid-cols-4 gap-px h-24 bg-white/4 rounded-2xl animate-pulse mb-10" />
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="h-[50vh] min-h-[320px] sm:h-[52vh] sm:min-h-[380px] bg-white/4 animate-pulse" />
+        <div className="container max-w-6xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px h-24 bg-white/4 rounded-xl sm:rounded-2xl animate-pulse mb-6 sm:mb-10" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
             <div className="lg:col-span-2 space-y-4">
               <div className="h-8 w-2/3 bg-white/5 rounded animate-pulse" />
               <div className="h-24 bg-white/5 rounded-xl animate-pulse" />
@@ -89,9 +89,9 @@ export default function CampaignDetailPage() {
 
   if (!campaign) {
     return (
-      <div className="flex-1 bg-[#0A1628] text-white min-h-screen flex items-center justify-center">
+      <div className="flex-1 bg-[#0A1628] text-white min-h-screen flex items-center justify-center px-4">
         <div className="text-center">
-          <p className="font-['DM_Serif_Display'] text-3xl text-white/40 mb-6">
+          <p className="font-['DM_Serif_Display'] text-2xl sm:text-3xl text-white/40 mb-6">
             Campaign not found.
           </p>
           <Link
@@ -147,7 +147,7 @@ export default function CampaignDetailPage() {
       </div>
 
       {/* ── HERO ── */}
-      <section className="relative h-[58vh] min-h-[420px] max-h-[640px] overflow-hidden">
+      <section className="relative h-[50vh] min-h-[320px] max-h-[640px] sm:h-[58vh] sm:min-h-[420px] overflow-hidden">
 
         {/* Image or fallback gradient */}
         {heroImage ? (
@@ -168,7 +168,7 @@ export default function CampaignDetailPage() {
         <div className="absolute top-0 left-0 right-0 h-24 bg-gradient-to-b from-[#0A1628]/50 to-transparent" />
 
         {/* Hero UI layer */}
-        <div className="absolute inset-0 flex flex-col justify-between p-6 lg:p-10">
+        <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-6 lg:p-10">
 
           {/* Top row: back + status */}
           <div className="flex items-center justify-between">
@@ -210,8 +210,8 @@ export default function CampaignDetailPage() {
             )}
 
             <h1
-              className="font-['DM_Serif_Display'] leading-[1.05] tracking-tight mb-5 text-shadow-hero"
-              style={{ fontSize: "clamp(2rem, 5vw, 4.5rem)" }}
+              className="font-['DM_Serif_Display'] leading-[1.05] tracking-tight mb-4 sm:mb-5 text-shadow-hero"
+              style={{ fontSize: "clamp(1.75rem, 5vw, 4.5rem)" }}
             >
               {c.title}
             </h1>
@@ -272,8 +272,8 @@ export default function CampaignDetailPage() {
       </section>
 
       {/* ── FLOATING STATS STRIP ── */}
-      <div className="relative z-10 container max-w-6xl mx-auto px-6 -mt-8 mb-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 border border-white/10 bg-[#0E1D30]/90 backdrop-blur-xl rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+      <div className="relative z-10 container max-w-6xl mx-auto px-4 sm:px-6 -mt-6 sm:-mt-8 mb-6 sm:mb-10">
+        <div className="grid grid-cols-2 md:grid-cols-4 border border-white/10 bg-[#0E1D30]/90 backdrop-blur-xl rounded-xl sm:rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
           {[
             {
               icon: <TrendingUp className="h-4 w-4" />,
@@ -306,7 +306,16 @@ export default function CampaignDetailPage() {
           ].map(({ icon, value, unit, label, highlight }, i) => (
             <div
               key={label}
-              className={`relative px-5 py-5 flex flex-col gap-1 ${i < 3 ? "border-r border-white/8" : ""} ${highlight ? "bg-[#34D399]/5" : ""}`}
+              className={[
+                "relative px-4 sm:px-5 py-4 sm:py-5 flex flex-col gap-1",
+                // Mobile 2-col: item 0,2 has right border; items 0,1 have bottom border
+                i % 2 === 0 ? "border-r border-white/8" : "",
+                i < 2 ? "border-b md:border-b-0 border-white/8" : "",
+                // Desktop 4-col: items 0,1,2 have right border (override mobile logic on md)
+                i === 1 ? "md:border-r border-white/8" : "",
+                i === 3 ? "md:border-r-0" : "",
+                highlight ? "bg-[#34D399]/5" : "",
+              ].filter(Boolean).join(" ")}
             >
               {highlight && (
                 <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-[#34D399]/60 to-[#FBBF24]/40" />
@@ -314,12 +323,12 @@ export default function CampaignDetailPage() {
               <div className={`${highlight ? "text-[#34D399]" : "text-white/30"} mb-1`}>
                 {icon}
               </div>
-              <div className="flex items-baseline gap-1.5">
-                <span className="font-['DM_Serif_Display'] text-2xl lg:text-3xl text-white leading-none">
+              <div className="flex items-baseline gap-1 sm:gap-1.5 flex-wrap">
+                <span className="font-['DM_Serif_Display'] text-xl sm:text-2xl lg:text-3xl text-white leading-none">
                   {value}
                 </span>
                 {unit && (
-                  <span className="text-xs font-mono text-white/30 leading-none">{unit}</span>
+                  <span className="text-[10px] sm:text-xs font-mono text-white/30 leading-none">{unit}</span>
                 )}
               </div>
               <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest">
@@ -331,14 +340,14 @@ export default function CampaignDetailPage() {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <div className="relative z-10 container max-w-6xl mx-auto px-6 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+      <div className="relative z-10 container max-w-6xl mx-auto px-4 sm:px-6 pb-16 sm:pb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 lg:gap-10 items-start">
 
           {/* ── LEFT COLUMN ── */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-5 sm:space-y-8">
 
             {/* Description */}
-            <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm p-7 lg:p-9">
+            <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm p-5 sm:p-7 lg:p-9">
               <h2 className="font-['DM_Serif_Display'] text-2xl mb-5 flex items-center gap-3">
                 <span className="text-[#34D399]/60 font-mono text-xs uppercase tracking-widest">About</span>
               </h2>
@@ -348,20 +357,20 @@ export default function CampaignDetailPage() {
             </div>
 
             {/* Progress section */}
-            <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm p-7 lg:p-9">
-              <div className="flex items-end justify-between mb-6">
-                <div>
+            <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm p-5 sm:p-7 lg:p-9">
+              <div className="flex items-end justify-between mb-6 gap-3">
+                <div className="min-w-0 flex-1">
                   <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest block mb-1">
                     Funding Progress
                   </span>
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-['DM_Serif_Display'] text-4xl text-white">{raised.toFixed(2)}</span>
-                    <span className="text-sm font-mono text-white/30">USDm raised</span>
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="font-['DM_Serif_Display'] text-3xl sm:text-4xl text-white">{raised.toFixed(2)}</span>
+                    <span className="text-xs sm:text-sm font-mono text-white/30">USDm raised</span>
                   </div>
                 </div>
-                <div className="text-right">
+                <div className="text-right shrink-0">
                   <span
-                    className="font-['DM_Serif_Display'] text-5xl leading-none"
+                    className="font-['DM_Serif_Display'] text-4xl sm:text-5xl leading-none"
                     style={{
                       background: "linear-gradient(135deg, #34D399, #FBBF24)",
                       WebkitBackgroundClip: "text",
@@ -409,8 +418,8 @@ export default function CampaignDetailPage() {
 
             {/* ── Milestones ── */}
             <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm overflow-hidden">
-              <div className="px-7 lg:px-9 py-6 border-b border-white/8 flex items-center justify-between">
-                <div>
+              <div className="px-5 sm:px-7 lg:px-9 py-5 sm:py-6 border-b border-white/8 flex items-center justify-between gap-3">
+                <div className="min-w-0">
                   <span className="text-[10px] font-mono text-[#34D399]/70 uppercase tracking-widest block mb-1">
                     On-chain Roadmap
                   </span>
@@ -424,7 +433,7 @@ export default function CampaignDetailPage() {
                   <span className="text-[10px] font-mono text-white/25 block mt-1">completed</span>
                 </div>
               </div>
-              <div className="p-7 lg:p-9">
+              <div className="p-5 sm:p-7 lg:p-9">
                 <MilestoneTracker
                   milestones={ms}
                   campaignId={campaignId}
@@ -438,7 +447,7 @@ export default function CampaignDetailPage() {
             {/* ── Donation History ── */}
             {ds.length > 0 && (
               <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm overflow-hidden">
-                <div className="px-7 lg:px-9 py-6 border-b border-white/8 flex items-center justify-between">
+                <div className="px-5 sm:px-7 lg:px-9 py-6 border-b border-white/8 flex items-center justify-between">
                   <div>
                     <span className="text-[10px] font-mono text-white/30 uppercase tracking-widest block mb-1">
                       Transaction Log
@@ -455,7 +464,7 @@ export default function CampaignDetailPage() {
                     .map((d, i) => (
                       <div
                         key={i}
-                        className="group flex items-center justify-between px-7 lg:px-9 py-4 hover:bg-white/[0.02] transition-colors"
+                        className="group flex items-center justify-between px-5 sm:px-7 lg:px-9 py-4 hover:bg-white/[0.02] transition-colors"
                       >
                         <div className="flex items-center gap-3">
                           <div
@@ -516,7 +525,7 @@ export default function CampaignDetailPage() {
 
                   {/* Urgency bar if < 7 days */}
                   {!isExpired && daysLeft <= 7 && daysLeft > 0 && (
-                    <div className="flex items-center gap-2 px-6 py-3 bg-[#FBBF24]/8 border-b border-[#FBBF24]/15">
+                    <div className="flex items-center gap-2 px-5 sm:px-6 py-3 bg-[#FBBF24]/8 border-b border-[#FBBF24]/15">
                       <Zap className="h-3.5 w-3.5 text-[#FBBF24] shrink-0" />
                       <span className="text-xs text-[#FBBF24]/80 font-mono">
                         {daysLeft === 1 ? "Last day!" : `${daysLeft} days left`}
@@ -524,11 +533,11 @@ export default function CampaignDetailPage() {
                     </div>
                   )}
 
-                  <div className="p-6">
+                  <div className="p-5 sm:p-6">
                     <h3 className="font-['DM_Serif_Display'] text-xl mb-1 text-white">
                       Support this mission
                     </h3>
-                    <p className="text-xs text-white/30 font-mono uppercase tracking-widest mb-6">
+                    <p className="text-xs text-white/30 font-mono uppercase tracking-widest mb-5 sm:mb-6">
                       Funds released by milestone only
                     </p>
                     <DonateForm
