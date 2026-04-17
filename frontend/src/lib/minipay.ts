@@ -10,9 +10,20 @@ export const CUSD_FEE_CURRENCY = CUSD_ADDRESS;
 
 export const CELO_CHAIN_ID = 42220;
 
+type MaybeMiniPayProvider = {
+  isMiniPay?: boolean;
+  providers?: Array<{ isMiniPay?: boolean }>;
+};
+
 export function isMiniPay(): boolean {
   if (typeof window === "undefined") return false;
-  return !!(window as any).ethereum?.isMiniPay;
+  const provider = (window as Window & { ethereum?: MaybeMiniPayProvider }).ethereum;
+  if (!provider) return false;
+  if (provider.isMiniPay) return true;
+  if (Array.isArray(provider.providers)) {
+    return provider.providers.some((p: { isMiniPay?: boolean }) => Boolean(p?.isMiniPay));
+  }
+  return false;
 }
 
 export function isCeloChain(chainId: number | undefined): boolean {

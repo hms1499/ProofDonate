@@ -1,18 +1,13 @@
 "use client";
 
 import { ConnectButton as RainbowKitConnectButton } from "@rainbow-me/rainbowkit";
-import { useEffect, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { isMiniPay } from "@/lib/minipay";
+import { useMiniPay } from "@/hooks/useMiniPay";
 
 export function ConnectButton() {
-  const [isMinipay, setIsMinipay] = useState(false);
+  const { hideConnectWalletButton } = useMiniPay();
 
-  useEffect(() => {
-    if (isMiniPay()) setIsMinipay(true);
-  }, []);
-
-  if (isMinipay) return null;
+  if (hideConnectWalletButton) return null;
 
   return (
     <RainbowKitConnectButton.Custom>

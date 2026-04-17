@@ -5,10 +5,10 @@ import "@rainbow-me/rainbowkit/styles.css";
 import { injectedWallet } from "@rainbow-me/rainbowkit/wallets";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { WagmiProvider, createConfig, createStorage, http, useAccount, useConnect } from "wagmi";
+import { WagmiProvider, createConfig, createStorage, http, useAccount } from "wagmi";
 import { celo } from "wagmi/chains";
 import { ConnectButton } from "./connect-button";
-import { isMiniPay } from "@/lib/minipay";
+import { useMiniPay } from "@/hooks/useMiniPay";
 
 const connectors = connectorsForWallets(
   [
@@ -39,22 +39,12 @@ const wagmiConfig = createConfig({
 const queryClient = new QueryClient();
 
 function WalletProviderInner({ children }: { children: React.ReactNode }) {
-  const { connect, connectors } = useConnect();
   const { isConnected, chainId } = useAccount();
-
-  useEffect(() => {
-    // Check if the app is running inside MiniPay
-    if (isMiniPay()) {
-      const injectedConnector = connectors.find((c) => c.id === "injected");
-      if (injectedConnector) {
-        connect({ connector: injectedConnector });
-      }
-    }
-  }, [connect, connectors]);
+  const { isMiniPay: inMiniPay } = useMiniPay();
 
   // Auto add & switch to Celo Mainnet (skip in MiniPay — always on Celo)
   useEffect(() => {
-    if (isMiniPay()) return;
+    if (inMiniPay) return;
     if (!isConnected || chainId === celo.id || !window.ethereum) return;
 
     const switchToCelo = async () => {
@@ -82,7 +72,7 @@ function WalletProviderInner({ children }: { children: React.ReactNode }) {
     };
 
     switchToCelo();
-  }, [isConnected, chainId]);
+  }, [isConnected, chainId, inMiniPay]);
 
   return <>{children}</>;
 }

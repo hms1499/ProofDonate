@@ -1,0 +1,16 @@
+{
+  "miniapp": {
+    "version": "1",
+    "name": "ProofDonate",
+    "iconUrl": "https://proof-donate.vercel.app/icon.png",
+    "homeUrl": "https://proof-donate.vercel.app",
+    "imageUrl": "https://proof-donate.vercel.app/og.png",
+    "buttonTitle": "Donate",
+    "splashImageUrl": "https://proof-donate.vercel.app/splash.png",
+    "splashBackgroundColor": "#0a1628",
+    "subtitle": "Transparent donations on Celo",
+    "description": "On-chain donation platform with milestone-based fund release and verified creators. Donate in cUSD, every promise proven.",
+    "primaryCategory": "finance",
+    "tags": ["donations", "celo", "stablecoin", "minipay", "charity"]
+  }
+}
