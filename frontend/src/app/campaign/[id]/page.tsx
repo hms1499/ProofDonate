@@ -9,6 +9,9 @@ import {
   useCampaign,
   useMilestones,
   useDonations,
+  useClaimRefund,
+  useDonorContribution,
+  useHasRefunded,
 } from "@/hooks/useProofDonate";
 import { truncateAddress } from "@/lib/app-utils";
 import { useCampaignMetadata } from "@/hooks/useCampaignMetadata";
@@ -25,6 +28,8 @@ import {
   TrendingUp,
   ExternalLink,
   Zap,
+  Loader2,
+  AlertTriangle,
 } from "lucide-react";
 import Link from "next/link";
 import type { Campaign, Milestone, Donation } from "@/types";
@@ -46,6 +51,22 @@ export default function CampaignDetailPage() {
   const { metadata } = useCampaignMetadata(
     (campaign as Campaign)?.metadataURI
   );
+
+  // Refund hooks
+  const { data: donorContribution } = useDonorContribution(
+    campaignId,
+    address as `0x${string}` | undefined
+  );
+  const { data: hasRefunded } = useHasRefunded(
+    campaignId,
+    address as `0x${string}` | undefined
+  );
+  const {
+    claimRefund,
+    isPending: isRefunding,
+    isConfirming: isRefundConfirming,
+    isSuccess: isRefundSuccess,
+  } = useClaimRefund();
 
   if (isLoading) {
     return (
@@ -527,6 +548,71 @@ export default function CampaignDetailPage() {
                 </p>
               </div>
             )}
+
+            {/* Refund card — visible when campaign ended/cancelled and user has donated */}
+            {(isExpired || !c.isActive) &&
+              address &&
+              donorContribution &&
+              (donorContribution as bigint) > 0n &&
+              !hasRefunded && (
+                <div className="border border-[#FBBF24]/20 rounded-2xl bg-[#FBBF24]/5 overflow-hidden">
+                  <div className="p-6 space-y-4">
+                    <div className="flex items-center gap-2 text-[#FBBF24]">
+                      <AlertTriangle className="h-4 w-4" />
+                      <span className="text-xs font-mono uppercase tracking-widest">
+                        Refund Available
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/40 leading-relaxed">
+                      This campaign has ended. You donated{" "}
+                      <span className="text-white/70 font-mono">
+                        {Number(formatEther(donorContribution as bigint)).toFixed(2)} cUSD
+                      </span>
+                      . You can claim your proportional refund from the remaining funds.
+                    </p>
+                    <button
+                      onClick={() => {
+                        claimRefund(campaignId);
+                      }}
+                      disabled={isRefunding || isRefundConfirming}
+                      className="w-full inline-flex items-center justify-center gap-2 bg-[#FBBF24] text-black font-semibold px-6 py-3 rounded-full hover:bg-[#F59E0B] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                      {isRefunding || isRefundConfirming ? (
+                        <>
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                          Claiming...
+                        </>
+                      ) : (
+                        "Claim Refund"
+                      )}
+                    </button>
+                    {isRefundSuccess && (
+                      <div className="text-center py-2 px-3 rounded-lg bg-[#34D399]/10 border border-[#34D399]/20">
+                        <p className="text-sm text-[#34D399] font-medium">
+                          Refund claimed successfully!
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+            {/* Already refunded notice */}
+            {(isExpired || !c.isActive) &&
+              address &&
+              hasRefunded && (
+                <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 p-6">
+                  <div className="flex items-center gap-2 text-white/30 mb-2">
+                    <CheckCircle className="h-4 w-4" />
+                    <span className="text-xs font-mono uppercase tracking-widest">
+                      Refund Claimed
+                    </span>
+                  </div>
+                  <p className="text-xs text-white/25">
+                    You have already claimed your refund for this campaign.
+                  </p>
+                </div>
+              )}
 
             {/* Campaign meta card */}
             <div className="border border-white/8 rounded-2xl bg-[#0F1D32]/60 backdrop-blur-sm overflow-hidden">
