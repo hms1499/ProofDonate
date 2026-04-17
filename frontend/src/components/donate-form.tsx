@@ -27,6 +27,8 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
     isPending: isDonating,
     isConfirming: isDonateConfirming,
     isSuccess: isDonateSuccess,
+    error: donateError,
+    hash: donateHash,
   } = useDonate();
 
   // Approval hook
@@ -40,10 +42,10 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
   } = useDonationTokenApproval(parsedAmount);
 
   // Auto-advance from step 1 to step 2 after approval
+  // Small delay ensures allowance refetch completes before donate simulation runs
   useEffect(() => {
     if (isApproved && step === 1) {
-      refetchAllowance();
-      setStep(2);
+      refetchAllowance().then(() => setStep(2));
     }
   }, [isApproved, step, refetchAllowance]);
 
@@ -92,7 +94,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
       <div className="text-[10px] font-mono text-white/25 text-right">
         Balance:{" "}
         {cusdBalance !== undefined
-          ? `${Number(formatEther(cusdBalance)).toFixed(2)} cUSD`
+          ? `${Number(formatEther(cusdBalance)).toFixed(2)} USDm`
           : "..."}
       </div>
 
@@ -121,7 +123,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
       {/* Amount input */}
       <div>
         <label className="text-xs font-mono text-white/30 uppercase tracking-widest mb-2 block">
-          Amount (cUSD)
+          Amount (USDm)
         </label>
         <input
           type="number"
@@ -137,7 +139,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
           className="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:outline-none focus:border-[#34D399]/50 focus:ring-1 focus:ring-[#34D399]/20 disabled:opacity-50 font-mono transition-colors"
         />
         <p className="text-[10px] text-white/20 mt-1.5 font-mono">
-          Minimum: 0.2 cUSD
+          Minimum: 0.2 USDm
         </p>
       </div>
 
@@ -187,13 +189,31 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
             {isApproving ? "Approving..." : "Confirming..."}
           </>
         ) : insufficientBalance ? (
-          "Insufficient cUSD"
+          "Insufficient USDm"
         ) : step === 1 ? (
-          needsApproval ? "Step 1: Approve cUSD" : "Step 1: Continue →"
+          needsApproval ? "Step 1: Approve USDm" : "Step 1: Continue →"
         ) : (
-          "Step 2: Donate cUSD"
+          "Step 2: Donate USDm"
         )}
       </button>
+
+      {/* Debug: tx hash */}
+      {donateHash && (
+        <div className="py-2 px-3 rounded-lg bg-white/5 border border-white/10">
+          <p className="text-[10px] font-mono text-white/40 break-all">
+            TX: {donateHash}
+          </p>
+        </div>
+      )}
+
+      {/* Error message */}
+      {donateError && (
+        <div className="py-2 px-3 rounded-lg bg-red-500/10 border border-red-500/20">
+          <p className="text-xs text-red-400 font-mono break-words">
+            {(donateError as any)?.shortMessage || donateError.message}
+          </p>
+        </div>
+      )}
 
       {/* Success message */}
       {isDonateSuccess && (

@@ -1,20 +1,18 @@
 /**
- * MiniPay-aware transaction helpers.
- * Wraps wagmi writeContract to attach feeCurrency when inside MiniPay.
+ * Celo fee currency helpers.
+ * Enables gas payment in cUSD for all wallets on Celo (not just MiniPay).
  */
 
-import { isMiniPay, CUSD_FEE_CURRENCY } from "./minipay";
+import { CUSD_FEE_CURRENCY } from "./minipay";
 
-/**
- * Adds feeCurrency to a writeContract config when inside MiniPay.
- * Outside MiniPay, returns the config unchanged.
- */
 /**
  * Returns a feeCurrency config object to spread into writeContract calls.
- * Inside MiniPay: { feeCurrency: CUSD_ADDRESS }
- * Outside MiniPay: {}
+ * Always sets cUSD as fee currency so users don't need CELO for gas.
+ *
+ * Wallet compatibility:
+ * - MiniPay, Valora, Coinbase Wallet: supported (CIP-64 tx type)
+ * - MetaMask: may not support — user will see an error and need CELO
  */
 export function feeCurrencyConfig(): { feeCurrency?: `0x${string}` } {
-  if (!isMiniPay()) return {};
   return { feeCurrency: CUSD_FEE_CURRENCY };
 }

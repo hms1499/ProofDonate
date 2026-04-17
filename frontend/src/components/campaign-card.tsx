@@ -89,7 +89,7 @@ export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardPr
               <div className="flex justify-between text-xs">
                 <span className="text-white/70 font-medium">
                   {raised.toFixed(2)}{" "}
-                  <span className="text-white/30 font-mono">cUSD</span>
+                  <span className="text-white/30 font-mono">USDm</span>
                 </span>
                 <span className="text-white/30 font-mono">
                   of {target.toFixed(0)}

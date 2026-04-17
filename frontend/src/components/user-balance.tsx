@@ -39,7 +39,7 @@ export function UserBalance() {
       <CardContent className="space-y-4">
         <div className="space-y-2 pt-2 border-t">
           <BalanceDisplay address={address} symbol="CELO" token={undefined} />
-          <BalanceDisplay address={address} token={cUSD_ADDRESS} symbol="cUSD" />
+          <BalanceDisplay address={address} token={cUSD_ADDRESS} symbol="USDm" />
           <BalanceDisplay address={address} token={USDC_ADDRESS} symbol="USDC" />
           <BalanceDisplay address={address} token={USDT_ADDRESS} symbol="USDT" />
         </div>
