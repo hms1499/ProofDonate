@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: 'ProofDonate - Transparent Donations on Celo',
   description: 'On-chain donation platform with milestone-based fund release and verified creators.',
   other: {
-    'talentapp:project_verification': '2803799da4ac004cb15a15c5485c3ef4579db69ac8a1ce709f5951bfbae97abd09fbe4a53de989bc9af3aa95ad69d2cda7f6234dbe4c3b58959c3c65308cd086',
+    'talentapp:project_verification': 'eade27fb74702eb5bfac702fc99c096daa89e39c1035a5f0fd83939eeb7a4b6fb82f94589d1d7d463a67acd3be821aea497ae581d5e0d107390963549eb656e4',
   },
 };
 
