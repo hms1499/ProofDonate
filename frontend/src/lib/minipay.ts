@@ -10,6 +10,8 @@ export const CUSD_FEE_CURRENCY = CUSD_ADDRESS;
 
 export const CELO_CHAIN_ID = 42220;
 
+export const MINIPAY_ADD_CASH_URL = "https://link.minipay.xyz/add_cash?tokens=USDM,USDT,USDC";
+
 type MaybeMiniPayProvider = {
   isMiniPay?: boolean;
   providers?: Array<{ isMiniPay?: boolean }>;

@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { parseEther, formatEther } from "viem";
 import { useDonate } from "@/hooks/useProofDonate";
 import { useDonationTokenApproval } from "@/hooks/useDonationTokenApproval";
+import { useMiniPay } from "@/hooks/useMiniPay";
+import { MINIPAY_ADD_CASH_URL } from "@/lib/minipay";
 import { useAccount } from "wagmi";
-import { Loader2, Wallet, Check } from "lucide-react";
+import { Loader2, Wallet, Check, PlusCircle } from "lucide-react";
 
 interface DonateFormProps {
   campaignId: bigint;
@@ -18,6 +20,7 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
   const [amount, setAmount] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const { address, isConnected } = useAccount();
+  const { isMiniPay: inMiniPay } = useMiniPay();
 
   const parsedAmount = amount ? parseEther(amount) : 0n;
 
@@ -178,24 +181,36 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
       )}
 
       {/* Action button */}
-      <button
-        onClick={handleStep}
-        disabled={isProcessing || !hasValidAmount || !!insufficientBalance}
-        className="w-full group inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {isProcessing ? (
-          <>
-            <Loader2 className="h-4 w-4 animate-spin" />
-            {isApproving ? "Approving..." : "Confirming..."}
-          </>
-        ) : insufficientBalance ? (
-          "Insufficient USDm"
-        ) : step === 1 ? (
-          needsApproval ? "Step 1: Approve USDm" : "Step 1: Continue →"
-        ) : (
-          "Step 2: Donate USDm"
-        )}
-      </button>
+      {insufficientBalance && inMiniPay ? (
+        <a
+          href={MINIPAY_ADD_CASH_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm"
+        >
+          <PlusCircle className="h-4 w-4" />
+          Add Cash to Continue
+        </a>
+      ) : (
+        <button
+          onClick={handleStep}
+          disabled={isProcessing || !hasValidAmount || !!insufficientBalance}
+          className="w-full group inline-flex items-center justify-center gap-2 bg-[#34D399] text-black font-semibold px-6 py-3.5 rounded-full hover:bg-[#10B981] transition-colors text-sm disabled:opacity-40 disabled:cursor-not-allowed"
+        >
+          {isProcessing ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {isApproving ? "Approving..." : "Confirming..."}
+            </>
+          ) : insufficientBalance ? (
+            "Insufficient USDm"
+          ) : step === 1 ? (
+            needsApproval ? "Step 1: Approve USDm" : "Step 1: Continue →"
+          ) : (
+            "Step 2: Donate USDm"
+          )}
+        </button>
+      )}
 
       {/* Debug: tx hash */}
       {donateHash && (
