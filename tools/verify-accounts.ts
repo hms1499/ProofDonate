@@ -1,3 +1,16 @@
+/**
+ * ProofDonateV2 Verify Accounts CLI Tool
+ * Derive accounts from mnemonic, request verification, then owner batch-verifies.
+ *
+ * Usage:
+ *   npx ts-node verify-accounts.ts --mnemonic "word1 ... word12" --count 10
+ *
+ * Prerequisites:
+ *   - .env file with PRIVATE_KEY (owner) and CELO_RPC_URL
+ *   - Each derived account must have CELO for gas (~0.001 CELO each)
+ *   - Owner wallet must have CELO for gas (~0.001 CELO per account)
+ */
+
 import * as dotenv from 'dotenv';
 import { resolve } from 'path';
 import { createPublicClient, createWalletClient, http } from 'viem';
