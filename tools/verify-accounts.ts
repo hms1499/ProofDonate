@@ -96,11 +96,135 @@ async function main() {
     mnemonicToAccount(mnemonic, { addressIndex: i })
   );
 
-  accounts.forEach((acc, i) => {
-    console.log(`[INFO] Account ${i}: ${acc.address}`);
+  // --- Task 5: Check on-chain state ---
+  type AccountStatus = {
+    address: `0x${string}`;
+    index: number;
+    account: ReturnType<typeof mnemonicToAccount>;
+    isVerified: boolean;
+    hasRequested: boolean;
+  };
+
+  console.log(`[INFO] Checking on-chain state for ${count} accounts...`);
+
+  const statuses: AccountStatus[] = await Promise.all(
+    accounts.map(async (account, i) => {
+      const [isVerified, hasRequested] = await Promise.all([
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: 'verifiedHumans',
+          args: [account.address],
+        }),
+        publicClient.readContract({
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: 'verificationRequested',
+          args: [account.address],
+        }),
+      ]);
+
+      return {
+        address: account.address,
+        index: i,
+        account,
+        isVerified: isVerified as boolean,
+        hasRequested: hasRequested as boolean,
+      };
+    })
+  );
+
+  statuses.forEach(({ index, address, isVerified, hasRequested }) => {
+    if (isVerified) {
+      console.log(`[SKIP] Account ${index}: ${address} → already verified`);
+    } else if (hasRequested) {
+      console.log(`[INFO] Account ${index}: ${address} → already requested, will verify`);
+    } else {
+      console.log(`[INFO] Account ${index}: ${address} → needs requestVerification`);
+    }
   });
 
-  console.log(`[INFO] Owner: ${ownerAccount.address}`);
+  // --- Task 6: Send requestVerification() in parallel ---
+  const needsRequest = statuses.filter((s) => !s.isVerified && !s.hasRequested);
+
+  if (needsRequest.length === 0) {
+    console.log('[INFO] No accounts need requestVerification');
+  } else {
+    console.log(`[INFO] Sending requestVerification() for ${needsRequest.length} accounts in parallel...`);
+
+    const requestResults = await Promise.allSettled(
+      needsRequest.map(async ({ account, address, index }) => {
+        const walletClient = createWalletClient({
+          account,
+          chain: celo,
+          transport: http(rpcUrl),
+        });
+
+        const hash = await walletClient.writeContract({
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: 'requestVerification',
+          args: [],
+        });
+
+        console.log(`[INFO] Account ${index}: ${address} → requestVerification tx: ${hash}`);
+
+        await publicClient.waitForTransactionReceipt({ hash });
+        console.log(`[SUCCESS] Account ${index}: ${address} → requestVerification confirmed`);
+
+        return address;
+      })
+    );
+
+    const failed = requestResults.filter((r) => r.status === 'rejected');
+    if (failed.length > 0) {
+      failed.forEach((r) => {
+        console.error(`[ERROR] requestVerification failed:`, (r as PromiseRejectedResult).reason);
+      });
+    }
+
+    const confirmed = requestResults.filter((r) => r.status === 'fulfilled').length;
+    console.log(`[SUCCESS] ${confirmed}/${needsRequest.length} requestVerification txs confirmed`);
+  }
+
+  // --- Task 7: Owner verifyHuman() sequentially ---
+  const toVerify = statuses.filter((s) => !s.isVerified);
+
+  if (toVerify.length === 0) {
+    console.log('[INFO] No accounts to verify');
+  } else {
+    console.log(`[INFO] Owner verifying ${toVerify.length} accounts sequentially...`);
+
+    const ownerWalletClient = createWalletClient({
+      account: ownerAccount,
+      chain: celo,
+      transport: http(rpcUrl),
+    });
+
+    let verifiedCount = 0;
+    let errorCount = 0;
+
+    for (const { address, index } of toVerify) {
+      try {
+        const hash = await ownerWalletClient.writeContract({
+          address: CONTRACT_ADDRESS,
+          abi: CONTRACT_ABI,
+          functionName: 'verifyHuman',
+          args: [address],
+        });
+
+        await publicClient.waitForTransactionReceipt({ hash });
+        console.log(`[INFO] verifyHuman(${address}) → tx: ${hash} ✓`);
+        verifiedCount++;
+      } catch (err) {
+        console.error(`[ERROR] verifyHuman failed for Account ${index} (${address}):`, err);
+        errorCount++;
+      }
+    }
+
+    const skipped = statuses.filter((s) => s.isVerified).length;
+    console.log(`[DONE] ${verifiedCount}/${count} accounts verified (${skipped} skipped, ${errorCount} errors)`);
+  }
 }
 
 main().catch((err) => {
