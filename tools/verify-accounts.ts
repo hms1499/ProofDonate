@@ -185,18 +185,26 @@ async function main() {
         await publicClient.waitForTransactionReceipt({ hash });
         console.log(`[SUCCESS] Account ${index}: ${address} → requestVerification confirmed`);
 
-        return address;
+        return { address, index };
       })
     );
 
-    const failed = requestResults.filter((r) => r.status === 'rejected');
-    if (failed.length > 0) {
-      failed.forEach((r) => {
-        console.error(`[ERROR] requestVerification failed:`, (r as PromiseRejectedResult).reason);
-      });
-    }
+    let confirmed = 0;
+    requestResults.forEach((result, i) => {
+      const { address, index } = needsRequest[i];
+      if (result.status === 'fulfilled') {
+        confirmed++;
+      } else {
+        const reason = result.reason?.message ?? String(result.reason);
+        const isGas = /insufficient fund|gas|balance/i.test(reason);
+        if (isGas) {
+          console.error(`[ERROR] Account ${index}: ${address} → insufficient CELO for gas`);
+        } else {
+          console.error(`[ERROR] Account ${index}: ${address} → ${reason}`);
+        }
+      }
+    });
 
-    const confirmed = requestResults.filter((r) => r.status === 'fulfilled').length;
     console.log(`[SUCCESS] ${confirmed}/${needsRequest.length} requestVerification txs confirmed`);
   }
 
