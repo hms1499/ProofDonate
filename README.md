@@ -34,8 +34,7 @@ ProofDonate ensures donor trust by releasing funds only when campaign creators h
 
 **Platform**
 - Deep navy UI with emerald/amber accents
-- Interactive tsParticles hero animation
-- Draggable image positioning for campaign covers
+- Animated network canvas hero
 - CELO ↔ cUSD swap powered by Uniswap V3
 - Mobile-responsive with wallet auto-detection (MiniPay support)
 
@@ -45,24 +44,57 @@ ProofDonate ensures donor trust by releasing funds only when campaign creators h
 
 ```
 proof-donate/
-├── contracts/               # Foundry — Solidity smart contracts
+├── contracts/                    # Foundry — Solidity smart contracts
 │   ├── src/
-│   │   └── ProofDonate.sol  # Main contract (campaigns, milestones, verification)
+│   │   ├── ProofDonate.sol       # Main contract (campaigns, milestones, verification)
+│   │   └── ProofDonateV2.sol     # V2 contract iteration
 │   ├── test/
-│   │   └── ProofDonate.t.sol
+│   │   ├── ProofDonate.t.sol
+│   │   └── ProofDonateV2.t.sol
 │   └── script/
-│       └── Deploy.s.sol
+│       ├── Deploy.s.sol
+│       └── DeployV2.s.sol
 │
-├── frontend/                # Next.js 14 — Web application
+├── frontend/                     # Next.js 14 — Web application
 │   ├── src/
-│   │   ├── app/             # Pages (home, campaign, admin, verify, swap, dashboard)
-│   │   ├── components/      # UI components (cards, forms, navbar, particles)
-│   │   ├── hooks/           # Contract interaction hooks (wagmi)
-│   │   ├── lib/             # Utilities (contracts ABI, pinata, swap logic)
-│   │   └── types/           # TypeScript interfaces
+│   │   ├── app/
+│   │   │   ├── page.tsx          # Home / campaign listing
+│   │   │   ├── campaign/
+│   │   │   │   ├── [id]/         # Campaign detail & donate
+│   │   │   │   └── create/       # Create campaign form
+│   │   │   ├── admin/            # Admin verification dashboard
+│   │   │   ├── dashboard/        # Creator campaign dashboard
+│   │   │   ├── verify/           # Proof-of-humanity request
+│   │   │   └── api/upload/       # Server-side Pinata upload route
+│   │   ├── components/
+│   │   │   ├── campaign-card.tsx
+│   │   │   ├── campaign-list.tsx
+│   │   │   ├── donate-form.tsx
+│   │   │   ├── milestone-tracker.tsx
+│   │   │   ├── navbar.tsx
+│   │   │   ├── network-canvas.tsx  # Hero canvas animation
+│   │   │   ├── connect-button.tsx
+│   │   │   ├── user-balance.tsx
+│   │   │   ├── wallet-provider.tsx
+│   │   │   └── ui/               # shadcn/ui primitives
+│   │   ├── hooks/
+│   │   │   ├── useProofDonate.ts       # All wagmi contract hooks
+│   │   │   ├── useCampaignMetadata.ts  # IPFS metadata resolver
+│   │   │   ├── useDonationTokenApproval.ts
+│   │   │   └── useMiniPay.ts
+│   │   ├── lib/
+│   │   │   ├── contracts.ts            # ABI + contract address
+│   │   │   ├── constants.ts
+│   │   │   ├── minipay.ts              # MiniPay detection & fee currency
+│   │   │   ├── minipay-transactions.ts
+│   │   │   ├── pinata.ts               # IPFS upload helpers
+│   │   │   ├── app-utils.ts            # Domain utilities
+│   │   │   └── utils.ts                # shadcn cn() helper
+│   │   └── types/
+│   │       └── index.ts
 │   └── public/
 │
-└── docs/                    # Documentation
+└── docs/                         # Internal plans & specs
 ```
 
 ---
@@ -77,7 +109,7 @@ proof-donate/
 | **Blockchain** | Celo Mainnet |
 | **DEX** | Uniswap V3 (CELO ↔ cUSD swap) |
 | **Storage** | Pinata (IPFS) for images & metadata |
-| **Animation** | tsParticles (hero), CSS keyframes |
+| **Animation** | Canvas API (network-canvas hero), CSS keyframes |
 
 ---
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { formatEther } from "viem";
+import { toast } from "sonner";
 import {
   useMilestoneReleaseTime,
   useReleaseMilestone,
@@ -38,6 +39,7 @@ interface MilestoneRowProps {
   currentAmount: bigint;
   onChange?: () => void;
   isLast: boolean;
+  now: number;
 }
 
 function MilestoneRow({
@@ -49,18 +51,19 @@ function MilestoneRow({
   currentAmount,
   onChange,
   isLast,
+  now,
 }: MilestoneRowProps) {
-  const { releaseMilestone, isPending, isConfirming, isSuccess } =
+  const { releaseMilestone, isPending, isConfirming, isSuccess, error: releaseError } =
     useReleaseMilestone();
   const {
     requestMilestoneRelease,
     isPending: isRequestPending,
     isConfirming: isRequestConfirming,
     isSuccess: isRequestSuccess,
+    error: requestError,
   } = useRequestMilestoneRelease();
   const { data: releaseTime, refetch: refetchReleaseTime } =
     useMilestoneReleaseTime(campaignId, BigInt(index));
-  const [now, setNow] = useState(() => Date.now());
 
   const releaseTimestamp =
     typeof releaseTime === "bigint" && releaseTime > 0n
@@ -82,21 +85,38 @@ function MilestoneRow({
     isPending || isConfirming || isRequestPending || isRequestConfirming;
 
   useEffect(() => {
-    if (!hasRequestedRelease || milestone.isReleased) return;
-
-    const intervalId = window.setInterval(() => {
-      setNow(Date.now());
-    }, 1000);
-
-    return () => window.clearInterval(intervalId);
-  }, [hasRequestedRelease, milestone.isReleased]);
-
-  useEffect(() => {
     if (!isRequestSuccess && !isSuccess) return;
+
+    if (isRequestSuccess) {
+      toast.success("Timelock started — funds release in 3 days");
+    }
+    if (isSuccess) {
+      toast.success("Milestone funds released!");
+    }
 
     refetchReleaseTime();
     onChange?.();
   }, [isRequestSuccess, isSuccess, onChange, refetchReleaseTime]);
+
+  useEffect(() => {
+    if (requestError) {
+      toast.error(
+        (requestError as any)?.shortMessage ??
+          requestError.message ??
+          "Transaction failed"
+      );
+    }
+  }, [requestError]);
+
+  useEffect(() => {
+    if (releaseError) {
+      toast.error(
+        (releaseError as any)?.shortMessage ??
+          releaseError.message ??
+          "Transaction failed"
+      );
+    }
+  }, [releaseError]);
 
   const countdownLabel =
     hasRequestedRelease && !isTimelockReady
@@ -232,6 +252,22 @@ export function MilestoneTracker({
   currentAmount,
   onChange,
 }: MilestoneTrackerProps) {
+  const [now, setNow] = useState(() => Date.now());
+
+  const hasActiveNonReleasedMilestone = milestones.some(
+    (m) => !m.isReleased
+  );
+
+  useEffect(() => {
+    if (!hasActiveNonReleasedMilestone) return;
+
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [hasActiveNonReleasedMilestone]);
+
   const getNextReleasableIndex = () => {
     for (let i = 0; i < milestones.length; i++) {
       if (!milestones[i].isReleased) return i;
@@ -257,6 +293,7 @@ export function MilestoneTracker({
             currentAmount={currentAmount}
             onChange={onChange}
             isLast={isLast}
+            now={now}
           />
         );
       })}

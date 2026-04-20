@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { formatEther } from "viem";
 import { truncateAddress } from "@/lib/app-utils";
@@ -14,7 +15,7 @@ interface CampaignCardProps {
   index?: number;
 }
 
-export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardProps) {
+export const CampaignCard = memo(function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardProps) {
   const raised = Number(formatEther(campaign.currentAmount));
   const target = Number(formatEther(campaign.targetAmount));
   const progress = target > 0 ? Math.min((raised / target) * 100, 100) : 0;
@@ -113,4 +114,4 @@ export function CampaignCard({ campaign, campaignId, index = 0 }: CampaignCardPr
       </div>
     </Link>
   );
-}
+});

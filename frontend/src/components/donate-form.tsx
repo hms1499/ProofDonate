@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { parseEther, formatEther } from "viem";
+import { toast } from "sonner";
 import { useDonate } from "@/hooks/useProofDonate";
 import { useDonationTokenApproval } from "@/hooks/useDonationTokenApproval";
 import { useMiniPay } from "@/hooks/useMiniPay";
@@ -55,11 +56,23 @@ export function DonateForm({ campaignId, onSuccess }: DonateFormProps) {
   // Reset on success
   useEffect(() => {
     if (isDonateSuccess) {
+      toast.success("Donation confirmed!");
       setAmount("");
       setStep(1);
       onSuccess?.();
     }
   }, [isDonateSuccess, onSuccess]);
+
+  // Toast on donation error
+  useEffect(() => {
+    if (donateError) {
+      toast.error(
+        (donateError as any)?.shortMessage ??
+          donateError.message ??
+          "Transaction failed"
+      );
+    }
+  }, [donateError]);
 
   if (!isConnected) {
     return (

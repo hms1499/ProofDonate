@@ -2,7 +2,11 @@
 
 import Link from "next/link";
 import { CampaignList } from "@/components/campaign-list";
-import { NetworkCanvas } from "@/components/network-canvas";
+import dynamic from "next/dynamic";
+const NetworkCanvas = dynamic(
+  () => import("@/components/network-canvas").then((m) => ({ default: m.NetworkCanvas })),
+  { ssr: false, loading: () => null }
+);
 import { useAccount } from "wagmi";
 import { ArrowRight, Eye, Shield, Layers } from "lucide-react";
 
