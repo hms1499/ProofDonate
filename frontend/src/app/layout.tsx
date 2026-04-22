@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 
@@ -14,6 +14,14 @@ export const metadata: Metadata = {
   other: {
     'talentapp:project_verification': 'eade27fb74702eb5bfac702fc99c096daa89e39c1035a5f0fd83939eeb7a4b6fb82f94589d1d7d463a67acd3be821aea497ae581d5e0d107390963549eb656e4',
   },
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#000000',
 };
 
 export default function RootLayout({

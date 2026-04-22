@@ -1,4 +1,4 @@
-export { CUSD_ADDRESS } from "./minipay";
+export { USDM_ADDRESS } from "./minipay";
 
 export const ERC20_ABI = [
   {

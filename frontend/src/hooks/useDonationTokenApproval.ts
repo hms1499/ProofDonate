@@ -6,7 +6,7 @@ import {
   useWaitForTransactionReceipt,
   useAccount,
 } from "wagmi";
-import { CUSD_ADDRESS } from "@/lib/minipay";
+import { USDM_ADDRESS } from "@/lib/minipay";
 import { ERC20_ABI } from "@/lib/constants";
 import { PROOF_DONATE_ADDRESS } from "@/lib/contracts";
 import { feeCurrencyConfig } from "@/lib/minipay-transactions";
@@ -15,7 +15,7 @@ export function useDonationTokenApproval(amount: bigint) {
   const { address } = useAccount();
 
   const { data: allowance, refetch: refetchAllowance } = useReadContract({
-    address: CUSD_ADDRESS,
+    address: USDM_ADDRESS,
     abi: ERC20_ABI,
     functionName: "allowance",
     args: address ? [address, PROOF_DONATE_ADDRESS] : undefined,
@@ -23,7 +23,7 @@ export function useDonationTokenApproval(amount: bigint) {
   });
 
   const { data: balance } = useReadContract({
-    address: CUSD_ADDRESS,
+    address: USDM_ADDRESS,
     abi: ERC20_ABI,
     functionName: "balanceOf",
     args: address ? [address] : undefined,
@@ -47,7 +47,7 @@ export function useDonationTokenApproval(amount: bigint) {
 
   const approve = () => {
     writeContract({
-      address: CUSD_ADDRESS,
+      address: USDM_ADDRESS,
       abi: ERC20_ABI,
       functionName: "approve",
       args: [PROOF_DONATE_ADDRESS, amount],

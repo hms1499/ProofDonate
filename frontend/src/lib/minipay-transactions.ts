@@ -1,5 +1,5 @@
-import { CUSD_FEE_CURRENCY, isMiniPay } from "./minipay";
+import { USDM_FEE_CURRENCY, isMiniPay } from "./minipay";
 
 export function feeCurrencyConfig(): { feeCurrency?: `0x${string}` } {
-  return isMiniPay() ? { feeCurrency: CUSD_FEE_CURRENCY } : {};
+  return isMiniPay() ? { feeCurrency: USDM_FEE_CURRENCY } : {};
 }
