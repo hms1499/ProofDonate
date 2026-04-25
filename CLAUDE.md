@@ -35,7 +35,7 @@ npm run verify       # Run verify-accounts.ts
 ## Architecture
 
 ### Smart Contract (`contracts/src/ProofDonate.sol`)
-Deployed on Celo Mainnet at `0x9c161Ec01be48E21904f4877e53b7F789fd23848`.
+Deployed on Celo Mainnet at `0x01d425F2d51178ff79c917bF5A4BC697798bC044`.
 
 Key flows:
 - **Verification**: users call `requestVerification()` → owner calls `verifyHuman(address)` to approve
@@ -69,7 +69,7 @@ Admin CLI for batch-verifying accounts: derives HD wallet accounts from a mnemon
 
 `frontend/.env.local`:
 ```
-NEXT_PUBLIC_PROOF_DONATE_ADDRESS=0x9c161Ec01be48E21904f4877e53b7F789fd23848
+NEXT_PUBLIC_PROOF_DONATE_ADDRESS=0x01d425F2d51178ff79c917bF5A4BC697798bC044
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=...
 NEXT_PUBLIC_PINATA_JWT=...
 NEXT_PUBLIC_PINATA_GATEWAY=...gateway.mypinata.cloud
