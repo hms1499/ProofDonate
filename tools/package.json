@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "verify": "ts-node verify-accounts.ts"
+    "verify": "ts-node verify-accounts.ts",
+    "balances": "ts-node check-balances.ts"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

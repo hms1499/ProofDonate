@@ -98,3 +98,9 @@ Thumbs.db
 
 # Turbo
 .turbo
+
+# Playwright MCP generated files
+.playwright-mcp/
+
+# Tools - admin scripts not for version control
+tools/check-balances.ts
